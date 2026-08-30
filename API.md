@@ -81,9 +81,18 @@ The response includes detected intent, semantic score, final score, and an expla
     "languages": [],
     "themes": ["Emotional"]
   },
-  "recommendations": []
+  "recommendations": [],
+  "meta": {
+    "provider": "ollama",
+    "model": "qwen2.5:3b",
+    "rankingEngine": "universal-hybrid-v1"
+  }
 }
 ```
+
+The hosted route calls the Ollama-compatible URL in `OLLAMA_CHAT_URL`. If it is
+unavailable, the response remains successful and uses the deterministic hybrid
+recommendation explanation.
 
 ## Preferences
 

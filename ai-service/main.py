@@ -6,8 +6,8 @@ from pydantic import BaseModel, Field
 
 
 app = FastAPI(title="EntertainmentAI LLM Service", version="1.0.0")
-OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
+OLLAMA_CHAT_URL = os.getenv("OLLAMA_CHAT_URL", "http://localhost:11434/api/chat")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:3b")
 
 
 class ExplainRequest(BaseModel):
@@ -20,7 +20,7 @@ class ExplainRequest(BaseModel):
 async def health() -> dict:
     try:
         async with httpx.AsyncClient(timeout=3) as client:
-            response = await client.get(f"{OLLAMA_BASE_URL}/api/tags")
+            response = await client.get(OLLAMA_CHAT_URL.replace("/api/chat", "/api/tags"))
         ollama = "online" if response.status_code == 200 else "degraded"
     except httpx.HTTPError:
         ollama = "offline"
@@ -38,11 +38,22 @@ async def explain(request: ExplainRequest) -> dict[str, str]:
     try:
         async with httpx.AsyncClient(timeout=45) as client:
             response = await client.post(
-                f"{OLLAMA_BASE_URL}/api/generate",
-                json={"model": OLLAMA_MODEL, "prompt": prompt, "stream": False},
+                OLLAMA_CHAT_URL,
+                json={
+                    "model": OLLAMA_MODEL,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "Write one concise, specific entertainment recommendation explanation.",
+                        },
+                        {"role": "user", "content": prompt},
+                    ],
+                    "stream": False,
+                },
             )
         response.raise_for_status()
-        return {"explanation": response.json().get("response", "").strip(), "provider": "ollama"}
+        message = response.json().get("message", {})
+        return {"explanation": message.get("content", "").strip(), "provider": "ollama"}
     except httpx.HTTPError:
         return {
             "explanation": f"{request.content_title} matches the themes and emotional tone in your recent activity.",

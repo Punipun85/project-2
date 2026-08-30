@@ -1,4 +1,5 @@
 import { listContents } from "@/lib/content-service";
+import { askOllama } from "@/lib/ollama";
 import { detectIntent, semanticSearch } from "@/lib/recommendation";
 
 export async function POST(request: Request) {
@@ -15,12 +16,22 @@ export async function POST(request: Request) {
   const intent = detectIntent(message);
   const matches = semanticSearch(items, message, 3);
   const titles = matches.map((match) => match.content.title);
-  const answer = matches.length
+  const fallbackAnswer = matches.length
     ? `I found ${titles.join(", ")}. ${matches[0].reason}`
     : "I could not find a strong match yet. Try adding a mood, language, genre, or content type.";
+  const ollama = await askOllama({
+    message,
+    candidates: matches.map((match) => ({
+      title: match.content.title,
+      type: match.content.type,
+      genres: match.content.genres,
+      themes: match.content.themes,
+      reason: match.reason,
+    })),
+  });
 
   return Response.json({
-    answer,
+    answer: ollama.answer ?? fallbackAnswer,
     intent,
     recommendations: matches.map((match) => ({
       id: match.content.id,
@@ -29,6 +40,10 @@ export async function POST(request: Request) {
       score: Number(match.finalScore.toFixed(4)),
       reason: match.reason,
     })),
-    meta: { provider: "local-intent-engine", llmReady: true },
+    meta: {
+      provider: ollama.provider,
+      model: ollama.model,
+      rankingEngine: "universal-hybrid-v1",
+    },
   });
 }

@@ -11,6 +11,10 @@ npm run dev
 
 Open `http://localhost:3000`.
 
+Local Cloudflare development reads Ollama settings from `.dev.vars`. The configured
+endpoint is `http://ASUS:11434/api/chat` with model `qwen2.5:3b`. Copy
+`.dev.vars.example` when setting up another machine.
+
 ```bash
 npm run build
 npm test
@@ -41,6 +45,7 @@ python data-pipeline/tmdb_sync.py --type kdrama --pages 2
 python data-pipeline/content_embedding.py anime_contents.ndjson
 ```
 
-TMDB synchronization requires `TMDB_API_TOKEN`. The AI service uses `OLLAMA_BASE_URL` and `OLLAMA_MODEL`.
+TMDB synchronization requires `TMDB_API_TOKEN`. The AI service uses
+`OLLAMA_CHAT_URL` and `OLLAMA_MODEL`.
 
 See [PRD.md](./PRD.md), [TDD.md](./TDD.md), [ARCHITECTURE.md](./ARCHITECTURE.md), and [API.md](./API.md) for the product and technical contracts.
