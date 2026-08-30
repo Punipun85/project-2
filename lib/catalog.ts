@@ -1,0 +1,411 @@
+export type ContentType =
+  | "movie"
+  | "anime"
+  | "kdrama"
+  | "series"
+  | "documentary";
+
+export type EntertainmentContent = {
+  id: string;
+  externalId: string;
+  provider: "tmdb" | "jikan" | "internal";
+  type: ContentType;
+  title: string;
+  originalTitle?: string;
+  description: string;
+  posterUrl: string;
+  backdropUrl: string;
+  genres: string[];
+  themes: string[];
+  language: string;
+  country: string;
+  releaseYear: number;
+  duration?: number;
+  episodes?: number;
+  season?: string;
+  studio?: string;
+  sourceMaterial?: string;
+  director?: string;
+  cast: string[];
+  rating: number;
+  popularity: number;
+  match: number;
+  reason: string;
+  progress?: number;
+};
+
+const unsplash = (id: string) =>
+  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=900&q=84`;
+
+export const catalog: EntertainmentContent[] = [
+  {
+    id: "movie-interstellar",
+    externalId: "157336",
+    provider: "tmdb",
+    type: "movie",
+    title: "Interstellar",
+    description:
+      "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival.",
+    posterUrl: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+    backdropUrl: unsplash("photo-1462331940025-496dfbfc7564"),
+    genres: ["Sci-Fi", "Drama", "Adventure"],
+    themes: ["Space", "Family", "Time", "Humanity"],
+    language: "English",
+    country: "United States",
+    releaseYear: 2014,
+    duration: 169,
+    director: "Christopher Nolan",
+    cast: ["Matthew McConaughey", "Anne Hathaway", "Jessica Chastain"],
+    rating: 8.7,
+    popularity: 98,
+    match: 98,
+    reason: "You consistently rate emotional science fiction and ambitious world-building highly.",
+    progress: 68,
+  },
+  {
+    id: "anime-attack-on-titan",
+    externalId: "16498",
+    provider: "jikan",
+    type: "anime",
+    title: "Attack on Titan",
+    originalTitle: "Shingeki no Kyojin",
+    description:
+      "Humanity fights for survival behind enormous walls while a young soldier uncovers the truth about the Titans.",
+    posterUrl: "https://cdn.myanimelist.net/images/anime/10/47347l.jpg",
+    backdropUrl: unsplash("photo-1518709268805-4e9042af9f23"),
+    genres: ["Action", "Drama", "Fantasy"],
+    themes: ["War", "Freedom", "Mystery", "Moral ambiguity"],
+    language: "Japanese",
+    country: "Japan",
+    releaseYear: 2013,
+    episodes: 25,
+    season: "Spring 2013",
+    studio: "Wit Studio",
+    sourceMaterial: "Manga",
+    director: "Tetsuro Araki",
+    cast: ["Yuki Kaji", "Yui Ishikawa", "Marina Inoue"],
+    rating: 8.6,
+    popularity: 99,
+    match: 97,
+    reason: "Its high-stakes mystery and morally complex characters match your taste for epic narratives.",
+    progress: 42,
+  },
+  {
+    id: "kdrama-moving",
+    externalId: "126485",
+    provider: "tmdb",
+    type: "kdrama",
+    title: "Moving",
+    originalTitle: "무빙",
+    description:
+      "Children with hidden superpowers and their parents face a dangerous secret from their shared past.",
+    posterUrl: unsplash("photo-1533929736458-ca588d08c8be"),
+    backdropUrl: unsplash("photo-1538485399081-7c897ea30bc1"),
+    genres: ["Action", "Drama", "Fantasy"],
+    themes: ["Family", "Superpowers", "Coming of age"],
+    language: "Korean",
+    country: "South Korea",
+    releaseYear: 2023,
+    episodes: 20,
+    season: "Season 1",
+    studio: "Studio & New",
+    director: "Park In-je",
+    cast: ["Ryu Seung-ryong", "Han Hyo-joo", "Zo In-sung"],
+    rating: 8.5,
+    popularity: 92,
+    match: 95,
+    reason: "A human family drama wrapped inside the superhero scale you enjoy.",
+    progress: 31,
+  },
+  {
+    id: "movie-dune-two",
+    externalId: "693134",
+    provider: "tmdb",
+    type: "movie",
+    title: "Dune: Part Two",
+    description:
+      "Paul Atreides unites with Chani and the Fremen while seeking revenge against those who destroyed his family.",
+    posterUrl: "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",
+    backdropUrl: unsplash("photo-1500534314209-a25ddb2bd429"),
+    genres: ["Sci-Fi", "Adventure"],
+    themes: ["Power", "Destiny", "Rebellion"],
+    language: "English",
+    country: "United States",
+    releaseYear: 2024,
+    duration: 166,
+    director: "Denis Villeneuve",
+    cast: ["Timothée Chalamet", "Zendaya", "Rebecca Ferguson"],
+    rating: 8.5,
+    popularity: 97,
+    match: 96,
+    reason: "Epic world-building and impossible stakes are a recurring favorite in your history.",
+  },
+  {
+    id: "anime-vinland-saga",
+    externalId: "37521",
+    provider: "jikan",
+    type: "anime",
+    title: "Vinland Saga",
+    description:
+      "A young warrior's path of revenge becomes a profound journey through war, purpose, and the meaning of freedom.",
+    posterUrl: "https://cdn.myanimelist.net/images/anime/1500/103005l.jpg",
+    backdropUrl: unsplash("photo-1520637836862-4d197d17c48a"),
+    genres: ["Action", "Drama", "Adventure"],
+    themes: ["War", "Revenge", "Redemption", "Freedom"],
+    language: "Japanese",
+    country: "Japan",
+    releaseYear: 2019,
+    episodes: 24,
+    season: "Summer 2019",
+    studio: "Wit Studio",
+    sourceMaterial: "Manga",
+    director: "Shuhei Yabuta",
+    cast: ["Yuto Uemura", "Naoya Uchida", "Kensho Ono"],
+    rating: 8.8,
+    popularity: 94,
+    match: 96,
+    reason: "It shares Attack on Titan's historical scale, moral ambiguity, and earned character growth.",
+  },
+  {
+    id: "anime-code-geass",
+    externalId: "1575",
+    provider: "jikan",
+    type: "anime",
+    title: "Code Geass",
+    description:
+      "An exiled prince gains a supernatural power and leads a rebellion through strategy, sacrifice, and deception.",
+    posterUrl: "https://cdn.myanimelist.net/images/anime/5/50331l.jpg",
+    backdropUrl: unsplash("photo-1531058020387-3be344556be6"),
+    genres: ["Action", "Sci-Fi", "Drama"],
+    themes: ["Genius protagonist", "Rebellion", "Mecha", "Politics"],
+    language: "Japanese",
+    country: "Japan",
+    releaseYear: 2006,
+    episodes: 25,
+    season: "Fall 2006",
+    studio: "Sunrise",
+    sourceMaterial: "Original",
+    director: "Goro Taniguchi",
+    cast: ["Jun Fukuyama", "Takahiro Sakurai", "Ami Koshimizu"],
+    rating: 8.7,
+    popularity: 93,
+    match: 94,
+    reason: "A brilliant antihero and escalating political conflict fit your cerebral-action profile.",
+  },
+  {
+    id: "anime-death-note",
+    externalId: "1535",
+    provider: "jikan",
+    type: "anime",
+    title: "Death Note",
+    description:
+      "A gifted student discovers a notebook with deadly power and enters a battle of wits with a legendary detective.",
+    posterUrl: "https://cdn.myanimelist.net/images/anime/9/9453l.jpg",
+    backdropUrl: unsplash("photo-1500534623283-312aade485b7"),
+    genres: ["Mystery", "Thriller", "Supernatural"],
+    themes: ["Genius protagonist", "Psychological", "Moral ambiguity"],
+    language: "Japanese",
+    country: "Japan",
+    releaseYear: 2006,
+    episodes: 37,
+    season: "Fall 2006",
+    studio: "Madhouse",
+    sourceMaterial: "Manga",
+    director: "Tetsuro Araki",
+    cast: ["Mamoru Miyano", "Kappei Yamaguchi"],
+    rating: 8.6,
+    popularity: 98,
+    match: 93,
+    reason: "Its strategic duel and morally grey lead align with your interest in intelligent protagonists.",
+  },
+  {
+    id: "kdrama-crash-landing",
+    externalId: "94796",
+    provider: "tmdb",
+    type: "kdrama",
+    title: "Crash Landing on You",
+    originalTitle: "사랑의 불시착",
+    description:
+      "A South Korean heiress accidentally lands in North Korea and is hidden by an army officer.",
+    posterUrl: unsplash("photo-1529156069898-49953e39b3ac"),
+    backdropUrl: unsplash("photo-1517154421773-0529f29ea451"),
+    genres: ["Romance", "Drama", "Comedy"],
+    themes: ["Forbidden love", "Found family", "Longing"],
+    language: "Korean",
+    country: "South Korea",
+    releaseYear: 2019,
+    episodes: 16,
+    season: "Season 1",
+    studio: "Studio Dragon",
+    director: "Lee Jeong-hyo",
+    cast: ["Hyun Bin", "Son Ye-jin", "Seo Ji-hye"],
+    rating: 8.7,
+    popularity: 96,
+    match: 92,
+    reason: "A sweeping romance with humor, danger, and the emotional payoff you tend to finish.",
+  },
+  {
+    id: "kdrama-twenty-five",
+    externalId: "129888",
+    provider: "tmdb",
+    type: "kdrama",
+    title: "Twenty Five Twenty One",
+    originalTitle: "스물다섯 스물하나",
+    description:
+      "A teenage fencer pursues her dreams and forms a life-changing bond during a time of national crisis.",
+    posterUrl: unsplash("photo-1524250502761-1ac6f2e30d43"),
+    backdropUrl: unsplash("photo-1494783367193-149034c05e8f"),
+    genres: ["Romance", "Drama"],
+    themes: ["First love", "Dreams", "Bittersweet ending", "Youth"],
+    language: "Korean",
+    country: "South Korea",
+    releaseYear: 2022,
+    episodes: 16,
+    season: "Season 1",
+    studio: "Hwa&Dam Pictures",
+    director: "Jung Ji-hyun",
+    cast: ["Kim Tae-ri", "Nam Joo-hyuk", "Bona"],
+    rating: 8.6,
+    popularity: 91,
+    match: 91,
+    reason: "Its bittersweet coming-of-age romance matches the emotional stories you save most.",
+  },
+  {
+    id: "series-stranger-things",
+    externalId: "66732",
+    provider: "tmdb",
+    type: "series",
+    title: "Stranger Things",
+    description:
+      "A group of young friends uncover supernatural forces and secret experiments in their small town.",
+    posterUrl: "https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg",
+    backdropUrl: unsplash("photo-1519608487953-e999c86e7455"),
+    genres: ["Sci-Fi", "Mystery", "Drama"],
+    themes: ["Friendship", "Coming of age", "Supernatural"],
+    language: "English",
+    country: "United States",
+    releaseYear: 2016,
+    episodes: 42,
+    season: "4 Seasons",
+    studio: "21 Laps Entertainment",
+    cast: ["Millie Bobby Brown", "Finn Wolfhard", "David Harbour"],
+    rating: 8.7,
+    popularity: 99,
+    match: 90,
+    reason: "A character-first genre story with mystery and emotional stakes that build over time.",
+  },
+  {
+    id: "series-breaking-bad",
+    externalId: "1396",
+    provider: "tmdb",
+    type: "series",
+    title: "Breaking Bad",
+    description:
+      "A chemistry teacher turns to manufacturing drugs and transforms into a ruthless criminal mastermind.",
+    posterUrl: "https://image.tmdb.org/t/p/w500/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg",
+    backdropUrl: unsplash("photo-1500534314209-a25ddb2bd429"),
+    genres: ["Crime", "Drama", "Thriller"],
+    themes: ["Antihero", "Transformation", "Consequences"],
+    language: "English",
+    country: "United States",
+    releaseYear: 2008,
+    episodes: 62,
+    season: "5 Seasons",
+    studio: "Sony Pictures Television",
+    cast: ["Bryan Cranston", "Aaron Paul", "Anna Gunn"],
+    rating: 9.5,
+    popularity: 98,
+    match: 89,
+    reason: "A precision-built character descent for your preference for morally complex protagonists.",
+  },
+  {
+    id: "movie-your-name",
+    externalId: "372058",
+    provider: "tmdb",
+    type: "movie",
+    title: "Your Name",
+    originalTitle: "君の名は。",
+    description:
+      "Two teenagers share a profound connection when they begin swapping bodies across time and distance.",
+    posterUrl: "https://image.tmdb.org/t/p/w500/q719jXXEzOoYaps6babgKnONONX.jpg",
+    backdropUrl: unsplash("photo-1534447677768-be436bb09401"),
+    genres: ["Animation", "Romance", "Fantasy"],
+    themes: ["Longing", "Memory", "Fate", "First love"],
+    language: "Japanese",
+    country: "Japan",
+    releaseYear: 2016,
+    duration: 106,
+    studio: "CoMix Wave Films",
+    director: "Makoto Shinkai",
+    cast: ["Ryunosuke Kamiki", "Mone Kamishiraishi"],
+    rating: 8.4,
+    popularity: 96,
+    match: 93,
+    reason: "It bridges your love of anime imagery and emotionally resonant romance.",
+  },
+  {
+    id: "documentary-planet-earth",
+    externalId: "68595",
+    provider: "tmdb",
+    type: "documentary",
+    title: "Planet Earth II",
+    description:
+      "An intimate exploration of the world's most extraordinary habitats and the animals living within them.",
+    posterUrl: unsplash("photo-1441974231531-c6227db76b6e"),
+    backdropUrl: unsplash("photo-1511497584788-876760111969"),
+    genres: ["Documentary", "Nature"],
+    themes: ["Nature", "Survival", "Planet"],
+    language: "English",
+    country: "United Kingdom",
+    releaseYear: 2016,
+    episodes: 6,
+    season: "Limited Series",
+    studio: "BBC Studios",
+    cast: ["David Attenborough"],
+    rating: 9.5,
+    popularity: 88,
+    match: 86,
+    reason: "A visually overwhelming change of pace that still rewards your curiosity about big worlds.",
+  },
+  {
+    id: "documentary-free-solo",
+    externalId: "515042",
+    provider: "tmdb",
+    type: "documentary",
+    title: "Free Solo",
+    description:
+      "Climber Alex Honnold prepares to ascend El Capitan without ropes in an unprecedented feat.",
+    posterUrl: unsplash("photo-1522163182402-834f871fd851"),
+    backdropUrl: unsplash("photo-1464822759023-fed622ff2c3b"),
+    genres: ["Documentary", "Adventure"],
+    themes: ["Obsession", "Risk", "Achievement"],
+    language: "English",
+    country: "United States",
+    releaseYear: 2018,
+    duration: 100,
+    director: "Elizabeth Chai Vasarhelyi, Jimmy Chin",
+    cast: ["Alex Honnold", "Tommy Caldwell"],
+    rating: 8.1,
+    popularity: 82,
+    match: 84,
+    reason: "A real-world story with the tension and impossible stakes of your favorite dramas.",
+  },
+];
+
+export const contentTypeLabels: Record<ContentType, string> = {
+  movie: "Movie",
+  anime: "Anime",
+  kdrama: "K-Drama",
+  series: "TV Series",
+  documentary: "Documentary",
+};
+
+export function contentSubtitle(content: EntertainmentContent): string {
+  const length = content.episodes
+    ? `${content.episodes} episodes`
+    : content.duration
+      ? `${Math.floor(content.duration / 60)}h ${content.duration % 60}m`
+      : content.releaseYear.toString();
+
+  return `${content.releaseYear} · ${content.genres[0]} · ${length}`;
+}
