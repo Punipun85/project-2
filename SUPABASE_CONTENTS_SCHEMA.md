@@ -1,13 +1,19 @@
 # Supabase `contents` schema
 
-The migration in
-`supabase/migrations/202609010001_create_contents.sql` creates the unified
-EntertainmentAI catalog and three idempotent sample records.
+The migrations in `supabase/migrations` create the unified EntertainmentAI
+catalog, apply the revised content taxonomy, and add five idempotent sample
+records.
 
 ## Design choices
 
-- `content_type` is a PostgreSQL enum so ingestion cannot introduce accidental
-  category spellings. The normalized TV value is `tv_series`.
+- `content_type` stores the stable top-level categories `movie`, `series`,
+  `anime`, `documentary`, and `special`. A check constraint rejects unknown
+  values while keeping the column straightforward for APIs and future schema
+  evolution.
+- `series_type` stores detailed episodic classifications such as `tv_series`,
+  `streaming_series`, `kdrama`, `jdrama`, `cdrama`, `limited_series`, and the
+  anime-specific values. A consistency constraint prevents a series subtype
+  from being attached to the wrong top-level category.
 - `source` remains text so new providers can be added without an enum migration.
   A canonical uppercase check keeps `(source, external_id)` deduplication
   reliable.
@@ -27,8 +33,8 @@ EntertainmentAI catalog and three idempotent sample records.
 ## Search and recommendation
 
 `search_document` is a stored, weighted `tsvector`: title has weight A, while
-overview, genres, and themes have weight B. Its GIN index supports full-text
-retrieval. A trigram title index handles fuzzy title matching.
+overview, genres, themes, and keywords have weight B. Its GIN index supports
+full-text retrieval. A trigram title index handles fuzzy title matching.
 
 `embedding` is `vector(384)`, matching the Sentence Transformer profile in this
 project. The partial HNSW cosine index excludes rows that have not been embedded
@@ -41,14 +47,15 @@ the column and `match_contents` argument before applying the migration.
 
 ## Row Level Security
 
-Anonymous and authenticated Supabase clients may select only active records.
-They receive no direct insert, update, or delete grants. Catalog ingestion and
-AI enrichment should run in a trusted backend with the Supabase `service_role`,
-which bypasses RLS. The service-role key must never be exposed in browser code.
+Anonymous Supabase clients may select active records only. Authenticated users
+may read the full catalog. Authenticated administrators with the trusted JWT
+claim `app_metadata.role = admin` receive CRUD access through RLS. Catalog
+ingestion and AI enrichment may also run in a trusted backend with the Supabase
+`service_role`, which bypasses RLS. The service-role key must never be exposed
+in browser code.
 
 ## Apply
 
-Apply through the Supabase CLI migration workflow or paste the migration into
-the Supabase SQL editor for a new project. The migration enables `vector` and
-`pg_trgm`, creates the schema, indexes, trigger, vector RPC, RLS policy, grants,
-and the three requested examples.
+Apply through the Supabase CLI migration workflow. The migrations enable
+`vector` and `pg_trgm`, create the schema, revised taxonomy, indexes, trigger,
+vector RPC, RLS policies, grants, and the five requested examples.
