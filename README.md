@@ -56,3 +56,6 @@ TMDB synchronization requires `TMDB_API_TOKEN`. The AI service uses
 `REMOTE_AI_BASE_URL`, `REMOTE_AI_API_KEY`, and `REMOTE_AI_MODEL`.
 
 See [PRD.md](./PRD.md), [TDD.md](./TDD.md), [ARCHITECTURE.md](./ARCHITECTURE.md), and [API.md](./API.md) for the product and technical contracts.
+
+The optional Supabase/PostgreSQL unified catalog migration is documented in
+[SUPABASE_CONTENTS_SCHEMA.md](./SUPABASE_CONTENTS_SCHEMA.md).
