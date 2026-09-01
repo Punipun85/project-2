@@ -1,5 +1,5 @@
 import { listContents } from "@/lib/content-service";
-import { askOllama } from "@/lib/ollama";
+import { askAI } from "@/lib/ai-provider";
 import { detectIntent, semanticSearch } from "@/lib/recommendation";
 
 export async function POST(request: Request) {
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
   const fallbackAnswer = matches.length
     ? `I found ${titles.join(", ")}. ${matches[0].reason}`
     : "I could not find a strong match yet. Try adding a mood, language, genre, or content type.";
-  const ollama = await askOllama({
+  const ai = await askAI({
     message,
     candidates: matches.map((match) => ({
       title: match.content.title,
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
   });
 
   return Response.json({
-    answer: ollama.answer ?? fallbackAnswer,
+    answer: ai.answer ?? fallbackAnswer,
     intent,
     recommendations: matches.map((match) => ({
       id: match.content.id,
@@ -41,8 +41,8 @@ export async function POST(request: Request) {
       reason: match.reason,
     })),
     meta: {
-      provider: ollama.provider,
-      model: ollama.model,
+      provider: ai.provider,
+      model: ai.model,
       rankingEngine: "universal-hybrid-v1",
     },
   });

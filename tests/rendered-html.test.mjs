@@ -116,7 +116,9 @@ test("answers natural-language entertainment searches", async () => {
   assert.ok(titles.includes("Code Geass") || titles.includes("Death Note"));
   assert.ok(payload.intent.contentTypes.includes("anime"));
   assert.ok(
-    ["ollama", "deterministic-fallback"].includes(payload.meta.provider),
+    ["ollama", "openai-compatible", "deterministic-fallback"].includes(
+      payload.meta.provider,
+    ),
   );
   if (payload.meta.provider === "ollama") {
     assert.equal(payload.meta.model, "qwen2.5:3b");

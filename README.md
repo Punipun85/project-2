@@ -15,6 +15,12 @@ Local Cloudflare development reads Ollama settings from `.dev.vars`. The configu
 endpoint is `http://ASUS:11434/api/chat` with model `qwen2.5:3b`. Copy
 `.dev.vars.example` when setting up another machine.
 
+Lumi uses a resilient provider chain: Ollama first, then an optional
+OpenAI-compatible remote API, then deterministic hybrid explanations. Configure
+the remote provider with `REMOTE_AI_BASE_URL`, `REMOTE_AI_API_KEY`, and
+`REMOTE_AI_MODEL`. The prepared base URL is `https://ai.punipuni.my.id/v1`;
+its key and model ID are intentionally not committed.
+
 ```bash
 npm run build
 npm test
@@ -46,6 +52,7 @@ python data-pipeline/content_embedding.py anime_contents.ndjson
 ```
 
 TMDB synchronization requires `TMDB_API_TOKEN`. The AI service uses
-`OLLAMA_CHAT_URL` and `OLLAMA_MODEL`.
+`OLLAMA_CHAT_URL` and `OLLAMA_MODEL`. The optional remote fallback uses
+`REMOTE_AI_BASE_URL`, `REMOTE_AI_API_KEY`, and `REMOTE_AI_MODEL`.
 
 See [PRD.md](./PRD.md), [TDD.md](./TDD.md), [ARCHITECTURE.md](./ARCHITECTURE.md), and [API.md](./API.md) for the product and technical contracts.

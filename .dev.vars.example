@@ -1,2 +1,5 @@
 OLLAMA_CHAT_URL=http://localhost:11434/api/chat
 OLLAMA_MODEL=qwen2.5:3b
+REMOTE_AI_BASE_URL=https://ai.punipuni.my.id/v1
+REMOTE_AI_API_KEY=replace-with-api-key
+REMOTE_AI_MODEL=replace-with-model-id

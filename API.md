@@ -90,9 +90,10 @@ The response includes detected intent, semantic score, final score, and an expla
 }
 ```
 
-The hosted route calls the Ollama-compatible URL in `OLLAMA_CHAT_URL`. If it is
-unavailable, the response remains successful and uses the deterministic hybrid
-recommendation explanation.
+The provider order is Ollama, an optional OpenAI-compatible remote API, then the
+deterministic hybrid explanation. The remote API requires
+`REMOTE_AI_BASE_URL`, `REMOTE_AI_API_KEY`, and `REMOTE_AI_MODEL`; its provider
+value is `openai-compatible`.
 
 ## Preferences
 
