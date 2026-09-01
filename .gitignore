@@ -32,6 +32,7 @@ yarn-error.log*
 .env*
 /.dev.vars
 !/.dev.vars.example
+!/data-pipeline/.env.example
 
 # vercel
 .vercel

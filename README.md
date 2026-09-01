@@ -46,12 +46,19 @@ python -m unittest discover -s ml-service/tests -v
 
 ```bash
 pip install -r data-pipeline/requirements.txt
-python data-pipeline/anime_sync.py --pages 2
-python data-pipeline/tmdb_sync.py --type kdrama --pages 2
-python data-pipeline/content_embedding.py anime_contents.ndjson
+copy data-pipeline\.env.example data-pipeline\.env
+python data-pipeline/main.py --pages 1 --dry-run --output normalized-contents.ndjson
+python data-pipeline/main.py --pages 1
 ```
 
-TMDB synchronization requires `TMDB_API_TOKEN`. The AI service uses
+The pipeline imports TMDB popular/top-rated movies and TV series plus Jikan top
+anime, normalizes every item to the Supabase `contents` schema, deduplicates by
+`(source, external_id)`, and performs bounded service-role upserts. Use repeated
+`--source` flags to run only `tmdb-movies`, `tmdb-tv`, or `jikan-anime`.
+
+TMDB synchronization requires `TMDB_API_KEY`; Supabase writes require
+`SUPABASE_URL` and a server-only `SUPABASE_KEY`. Never expose the service-role
+key to frontend code. The AI service uses
 `OLLAMA_CHAT_URL` and `OLLAMA_MODEL`. The optional remote fallback uses
 `REMOTE_AI_BASE_URL`, `REMOTE_AI_API_KEY`, and `REMOTE_AI_MODEL`.
 
