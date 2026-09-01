@@ -15,6 +15,9 @@ EntertainmentAI catalog and three idempotent sample records.
   simple string values today and richer objects with names, roles, characters,
   ordering, language, or external IDs later. JSONB GIN indexes accelerate
   containment filters for genres, themes, and moods.
+- The required `cast` column is declared as `"cast"` because `CAST` is a SQL
+  keyword. Supabase REST responses still expose the property normally as
+  `cast`; quote it only when writing raw SQL identifiers.
 - Ratings use a consistent 0–10 scale. The ingestion pipeline should normalize
   source-specific scores before writing `rating_average` and preserve IMDb and
   MyAnimeList values in their dedicated fields.

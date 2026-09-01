@@ -57,7 +57,7 @@ create table if not exists public.contents (
   network text,
 
   director jsonb not null default '[]'::jsonb,
-  cast jsonb not null default '[]'::jsonb,
+  "cast" jsonb not null default '[]'::jsonb,
   characters jsonb not null default '[]'::jsonb,
 
   rating_average numeric(4, 2),
@@ -93,7 +93,7 @@ create table if not exists public.contents (
   constraint contents_country_array check (jsonb_typeof(country) = 'array'),
   constraint contents_studio_array check (jsonb_typeof(studio) = 'array'),
   constraint contents_director_array check (jsonb_typeof(director) = 'array'),
-  constraint contents_cast_array check (jsonb_typeof(cast) = 'array'),
+  constraint contents_cast_array check (jsonb_typeof("cast") = 'array'),
   constraint contents_characters_array check (jsonb_typeof(characters) = 'array'),
   constraint contents_ai_tags_array check (jsonb_typeof(ai_tags) = 'array'),
   constraint contents_themes_array check (jsonb_typeof(themes) = 'array'),
@@ -139,7 +139,7 @@ comment on column public.contents.season_number is 'Total known seasons or sourc
 comment on column public.contents.studio is 'JSON array of production studio objects or names.';
 comment on column public.contents.network is 'Primary broadcaster, network, or streaming platform.';
 comment on column public.contents.director is 'JSON array of director or creator objects.';
-comment on column public.contents.cast is 'JSON array of cast objects; objects may include name, role, order, and external IDs.';
+comment on column public.contents."cast" is 'JSON array of cast objects; objects may include name, role, order, and external IDs.';
 comment on column public.contents.characters is 'JSON array of character and performer or voice-actor relationships.';
 comment on column public.contents.rating_average is 'Source-normalized aggregate rating on a 0 to 10 scale.';
 comment on column public.contents.rating_count is 'Number of ratings behind rating_average.';
@@ -227,13 +227,13 @@ as $$
     c.overview,
     c.poster_url,
     c.rating_average,
-    1 - (c.embedding <=> query_embedding) as similarity
+    1 - (c.embedding OPERATOR(extensions.<=>) query_embedding) as similarity
   from public.contents as c
   where c.is_active
     and c.embedding is not null
     and (filter_content_type is null or c.content_type = filter_content_type)
-    and 1 - (c.embedding <=> query_embedding) >= coalesce(min_similarity, 0)
-  order by c.embedding <=> query_embedding
+    and 1 - (c.embedding OPERATOR(extensions.<=>) query_embedding) >= coalesce(min_similarity, 0)
+  order by c.embedding OPERATOR(extensions.<=>) query_embedding
   limit least(greatest(coalesce(match_count, 10), 1), 100);
 $$;
 
@@ -296,7 +296,7 @@ insert into public.contents (
   studio,
   network,
   director,
-  cast,
+  "cast",
   characters,
   rating_average,
   rating_count,
@@ -436,7 +436,7 @@ set
   studio = excluded.studio,
   network = excluded.network,
   director = excluded.director,
-  cast = excluded.cast,
+  "cast" = excluded."cast",
   characters = excluded.characters,
   rating_average = excluded.rating_average,
   rating_count = excluded.rating_count,
