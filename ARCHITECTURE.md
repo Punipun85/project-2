@@ -11,10 +11,9 @@ flowchart LR
     EDGE --> AI["Ollama LLM service"]
     API --> AI
     REC --> VECTOR["Embedding / vector index"]
-    SYNC["Content sync service"] --> TMDB["TMDB API"]
-    SYNC --> ANIME["Anime service / Jikan"]
-    SYNC --> D1
-    SYNC --> PG
+    PIPELINE["Unified data pipeline"] --> TMDB["TMDB API"]
+    PIPELINE --> JIKAN["Jikan API"]
+    PIPELINE --> PG
 ```
 
 ## Repository boundaries
@@ -27,9 +26,7 @@ lib/                    Shared TypeScript catalog and ranking contracts
 backend/                FastAPI and PostgreSQL domain service
 ml-service/             Universal hybrid recommendation engine and tests
 ai-service/             Ollama-compatible explanation service
-anime-service/          Jikan integration boundary
-content-sync-service/   Background catalog synchronization
-data-pipeline/          TMDB/Jikan normalization and embedding scripts
+data-pipeline/          Primary TMDB/Jikan ingestion, normalization, Supabase upsert, and embedding pipeline
 ```
 
 ## Request paths
@@ -52,11 +49,12 @@ data-pipeline/          TMDB/Jikan normalization and embedding scripts
 
 ### Catalog synchronization
 
-1. A scheduled job starts a provider sync.
-2. Provider-specific services apply rate limiting and fetch raw data.
-3. The pipeline maps provider payloads to `NormalizedContent`.
-4. Embeddings are generated from type-aware text.
-5. Upsert uses `(provider, external_id, type)` as the idempotency key.
+1. A scheduled job runs `data-pipeline/main.py`.
+2. Provider modules apply retry, timeout, and rate limiting while fetching raw data.
+3. The pipeline maps every provider payload to the Supabase `contents` vocabulary.
+4. Sparse records are grouped so an upsert does not erase richer metadata.
+5. Supabase upsert uses `(source, external_id)` as the idempotency key.
+6. Embeddings can be generated separately from normalized content.
 
 ## Deployment profiles
 

@@ -9,14 +9,14 @@
 | Domain API | FastAPI, Pydantic, SQLAlchemy |
 | Edge persistence | Cloudflare D1 through Drizzle ORM |
 | Primary production database | PostgreSQL |
-| Catalog providers | TMDB and Jikan |
+| Catalog providers | TMDB and Jikan through the unified `data-pipeline` |
 | Recommendation | Python universal hybrid engine |
 | Embeddings | Sentence Transformers; ChromaDB adapter planned |
 | LLM | Ollama-compatible service with deterministic fallback |
 
 ## Universal content model
 
-`contents` replaces the movie-only concept. Provider identity is unique across `(provider, external_id, type)`. Arrays are JSON in PostgreSQL and serialized JSON text in D1.
+`contents` replaces the movie-only concept. Provider identity is unique across `(source, external_id)` in Supabase. Arrays are JSONB in PostgreSQL and serialized JSON text in D1.
 
 Important type-specific fields remain nullable:
 
@@ -64,7 +64,7 @@ D1 is configured as the Sites persistence layer and ships with a Drizzle migrati
 - A fresh D1 database returns the curated catalog until provider sync runs.
 - Jikan and TMDB failures do not block the existing catalog.
 - Ollama failure returns a deterministic explanation.
-- Provider synchronization runs outside the user request path.
+- The unified `data-pipeline` runs provider synchronization outside the user request path.
 - Inputs are length-limited and supported content types are allow-listed.
 
 ## Security
