@@ -9,7 +9,7 @@
 | Domain API | FastAPI, Pydantic, SQLAlchemy |
 | Edge persistence | Cloudflare D1 through Drizzle ORM |
 | Primary production database | PostgreSQL |
-| Catalog providers | TMDB and Jikan through the unified `data-pipeline` |
+| Catalog providers | TMDB and official MyAnimeList API v2 through the unified `data-pipeline` |
 | Recommendation | Python universal hybrid engine |
 | Embeddings | Sentence Transformers; ChromaDB adapter planned |
 | LLM | Ollama-compatible service with deterministic fallback |
@@ -62,7 +62,7 @@ D1 is configured as the Sites persistence layer and ships with a Drizzle migrati
 ## Failure behavior
 
 - A fresh D1 database returns the curated catalog until provider sync runs.
-- Jikan and TMDB failures do not block the existing catalog.
+- MAL and TMDB provider failures are isolated so healthy provider imports can continue.
 - Ollama failure returns a deterministic explanation.
 - The unified `data-pipeline` runs provider synchronization outside the user request path.
 - Inputs are length-limited and supported content types are allow-listed.

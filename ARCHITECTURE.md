@@ -12,7 +12,7 @@ flowchart LR
     API --> AI
     REC --> VECTOR["Embedding / vector index"]
     PIPELINE["Unified data pipeline"] --> TMDB["TMDB API"]
-    PIPELINE --> JIKAN["Jikan API"]
+    PIPELINE --> MAL["MyAnimeList API v2"]
     PIPELINE --> PG
 ```
 
@@ -26,7 +26,7 @@ lib/                    Shared TypeScript catalog and ranking contracts
 backend/                FastAPI and PostgreSQL domain service
 ml-service/             Universal hybrid recommendation engine and tests
 ai-service/             Ollama-compatible explanation service
-data-pipeline/          Primary TMDB/Jikan ingestion, normalization, Supabase upsert, and embedding pipeline
+data-pipeline/          Batch 1 TMDB/MAL ingestion, normalization, logging, and Supabase upsert pipeline
 ```
 
 ## Request paths
@@ -54,7 +54,7 @@ data-pipeline/          Primary TMDB/Jikan ingestion, normalization, Supabase up
 3. The pipeline maps every provider payload to the Supabase `contents` vocabulary.
 4. Sparse records are grouped so an upsert does not erase richer metadata.
 5. Supabase upsert uses `(source, external_id)` as the idempotency key.
-6. Embeddings can be generated separately from normalized content.
+6. Later batches can enrich normalized content without changing this ingestion contract.
 
 ## Deployment profiles
 

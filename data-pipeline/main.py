@@ -1,162 +1,278 @@
-"""Import TMDB movies/TV and Jikan anime into Supabase contents."""
+"""Run the NexaPlay AI Batch 1 entertainment metadata pipeline."""
+
+from __future__ import annotations
 
 import argparse
-import json
-import os
+import logging
 import sys
-from collections.abc import Iterable
+import time
+from collections.abc import Callable
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import requests
-from dotenv import load_dotenv
+from pydantic import ValidationError
 
-from jikan_anime import get_anime, normalize as normalize_anime
-from models import NormalizedContent
-from supabase_client import upsert_contents
-from tmdb_movie import get_movies, normalize as normalize_movie
-from tmdb_tv import get_tv, normalize as normalize_tv
+from config.settings import PIPELINE_ROOT, Settings, get_settings
+from database.supabase_client import get_supabase_client
+from database.uploader import SupabaseUploader
+from processors.normalizer import (
+    ContentRecord,
+    normalize_mal_anime,
+    normalize_tmdb_movie,
+    normalize_tmdb_series,
+)
+from sources.mal_anime import MalAnimeClient, get_anime_detail, get_seasonal_anime, get_top_anime
+from sources.tmdb_movie import (
+    create_client as create_tmdb_movie_client,
+    get_movie_detail,
+    get_popular_movies,
+    get_top_rated_movies,
+)
+from sources.tmdb_series import (
+    create_client as create_tmdb_series_client,
+    get_popular_series,
+    get_series_detail,
+    get_top_rated_series,
+)
 
 
-ENV_FILE = Path(__file__).with_name(".env")
-load_dotenv(ENV_FILE)
+LOGGER = logging.getLogger("nexaplay.pipeline")
 
 
-def collect_contents(
+@dataclass
+class ImportResult:
+    label: str
+    imported: int = 0
+    normalized: int = 0
+    failed: int = 0
+    provider_error: str | None = None
+
+
+def configure_logging(settings: Settings) -> Path:
+    log_dir = PIPELINE_ROOT / "logs"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_file = log_dir / "pipeline.log"
+    logging.basicConfig(
+        level=getattr(logging, settings.log_level, logging.INFO),
+        format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+        handlers=[
+            logging.FileHandler(log_file, encoding="utf-8"),
+            logging.StreamHandler(sys.stdout),
+        ],
+        force=True,
+    )
+    return log_file
+
+
+def import_tmdb_movies(
+    settings: Settings,
     *,
     pages: int,
-    sources: set[str],
-    strict: bool = False,
-) -> tuple[list[NormalizedContent], dict[str, str]]:
-    records: dict[tuple[str, str], NormalizedContent] = {}
-    failures: dict[str, str] = {}
-
-    if "tmdb-movies" in sources:
-        _collect_source(
-            "tmdb-movies",
-            records,
-            failures,
-            lambda: (
-                normalize_movie(item)
-                for list_type in ("popular", "top_rated")
-                for item in get_movies(pages=pages, list_type=list_type)
-            ),
-            strict=strict,
-        )
-
-    if "tmdb-tv" in sources:
-        _collect_source(
-            "tmdb-tv",
-            records,
-            failures,
-            lambda: (
-                normalize_tv(item)
-                for list_type in ("popular", "top_rated")
-                for item in get_tv(pages=pages, list_type=list_type)
-            ),
-            strict=strict,
-        )
-
-    if "jikan-anime" in sources:
-        _collect_source(
-            "jikan-anime",
-            records,
-            failures,
-            lambda: (normalize_anime(item) for item in get_anime(pages=pages)),
-            strict=strict,
-        )
-
-    return list(records.values()), failures
-
-
-def _collect_source(
-    name: str,
-    target: dict[tuple[str, str], NormalizedContent],
-    failures: dict[str, str],
-    loader,
-    *,
-    strict: bool,
-) -> None:
+    uploader: SupabaseUploader | None,
+) -> ImportResult:
+    result = ImportResult("Movies")
     try:
-        _merge(target, loader())
-    except (requests.RequestException, RuntimeError) as error:
-        if strict:
-            raise
-        failures[name] = str(error)
+        settings.require_tmdb()
+        client = create_tmdb_movie_client(settings)
+        raw = _collect_lists(
+            pages,
+            (
+                ("popular", lambda page: get_popular_movies(page, settings=settings, client=client)),
+                ("top_rated", lambda page: get_top_rated_movies(page, settings=settings, client=client)),
+            ),
+            result,
+        )
+        records = _normalize_details(
+            raw,
+            lambda content_id: get_movie_detail(content_id, settings=settings, client=client),
+            lambda item: normalize_tmdb_movie(item, cast_limit=settings.cast_limit),
+            result,
+        )
+        result.normalized = len(records)
+        result.imported = uploader.upload_batch(records) if uploader else len(records)
+    except Exception as error:
+        result.provider_error = str(error)
+        LOGGER.exception("TMDB Movie gagal; pipeline melanjutkan provider berikutnya")
+    return result
 
 
-def _merge(
-    target: dict[tuple[str, str], NormalizedContent],
-    values: Iterable[NormalizedContent],
-) -> None:
-    for content in values:
-        target[(content.source, content.external_id)] = content
+def import_tmdb_series(
+    settings: Settings,
+    *,
+    pages: int,
+    uploader: SupabaseUploader | None,
+) -> ImportResult:
+    result = ImportResult("Series")
+    try:
+        settings.require_tmdb()
+        client = create_tmdb_series_client(settings)
+        raw = _collect_lists(
+            pages,
+            (
+                ("popular", lambda page: get_popular_series(page, settings=settings, client=client)),
+                ("top_rated", lambda page: get_top_rated_series(page, settings=settings, client=client)),
+            ),
+            result,
+        )
+        records = _normalize_details(
+            raw,
+            lambda content_id: get_series_detail(content_id, settings=settings, client=client),
+            lambda item: normalize_tmdb_series(item, cast_limit=settings.cast_limit),
+            result,
+        )
+        result.normalized = len(records)
+        result.imported = uploader.upload_batch(records) if uploader else len(records)
+    except Exception as error:
+        result.provider_error = str(error)
+        LOGGER.exception("TMDB Series gagal; pipeline melanjutkan provider berikutnya")
+    return result
+
+
+def import_mal_anime(
+    settings: Settings,
+    *,
+    pages: int,
+    uploader: SupabaseUploader | None,
+) -> ImportResult:
+    result = ImportResult("Anime")
+    try:
+        settings.require_mal()
+        client = MalAnimeClient(settings)
+        raw = _collect_lists(
+            pages,
+            (
+                ("top", lambda page: get_top_anime(page, client=client)),
+                ("seasonal", lambda page: get_seasonal_anime(page=page, client=client)),
+            ),
+            result,
+        )
+        records = _normalize_details(
+            raw,
+            lambda content_id: get_anime_detail(content_id, client=client),
+            normalize_mal_anime,
+            result,
+        )
+        result.normalized = len(records)
+        result.imported = uploader.upload_batch(records) if uploader else len(records)
+    except Exception as error:
+        result.provider_error = str(error)
+        LOGGER.exception("MyAnimeList gagal; pipeline provider lain tetap dipertahankan")
+    return result
+
+
+def _collect_lists(
+    pages: int,
+    loaders: tuple[tuple[str, Callable[[int], list[dict[str, Any]]]], ...],
+    result: ImportResult,
+) -> dict[str, dict[str, Any]]:
+    records: dict[str, dict[str, Any]] = {}
+    for list_name, loader in loaders:
+        for page in range(1, pages + 1):
+            try:
+                for item in loader(page):
+                    if item.get("id") is not None:
+                        records[str(item["id"])] = item
+            except (requests.RequestException, RuntimeError, ValueError) as error:
+                result.failed += 1
+                LOGGER.error("Gagal mengambil list %s halaman %s: %s", list_name, page, error)
+    return records
+
+
+def _normalize_details(
+    summaries: dict[str, dict[str, Any]],
+    detail_loader: Callable[[str], dict[str, Any]],
+    normalizer: Callable[[dict[str, Any]], ContentRecord],
+    result: ImportResult,
+) -> list[ContentRecord]:
+    normalized: list[ContentRecord] = []
+    for content_id, summary in summaries.items():
+        try:
+            try:
+                raw = detail_loader(content_id)
+            except requests.RequestException as error:
+                LOGGER.warning("Detail %s gagal, memakai data list: %s", content_id, error)
+                raw = summary
+            normalized.append(normalizer(raw))
+        except (ValidationError, ValueError, TypeError) as error:
+            result.failed += 1
+            LOGGER.error("Record %s tidak valid dan dilewati: %s", content_id, error)
+        except Exception as error:
+            result.failed += 1
+            LOGGER.error("Record %s gagal diproses dan dilewati: %s", content_id, error)
+    return normalized
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--pages",
-        type=int,
-        default=int(os.getenv("IMPORT_PAGES", "1")),
-        help="Number of pages per external endpoint (default: 1)",
-    )
+    parser.add_argument("--pages", type=int, help="Jumlah halaman per list provider")
     parser.add_argument(
         "--source",
         action="append",
-        choices=("tmdb-movies", "tmdb-tv", "jikan-anime"),
-        dest="sources",
-        help="Import only selected sources; repeat the option to select multiple",
+        choices=("tmdb-movies", "tmdb-series", "mal-anime"),
+        help="Batasi provider; opsi boleh diulang",
     )
-    parser.add_argument(
-        "--batch-size",
-        type=int,
-        default=int(os.getenv("IMPORT_BATCH_SIZE", "100")),
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Fetch and normalize records without writing to Supabase",
-    )
-    parser.add_argument(
-        "--strict",
-        action="store_true",
-        help="Stop immediately if one provider fails instead of importing healthy providers",
-    )
-    parser.add_argument(
-        "--output",
-        help="Optional NDJSON output path for auditing normalized records",
-    )
+    parser.add_argument("--dry-run", action="store_true", help="Ambil dan validasi tanpa upload")
     return parser.parse_args()
 
 
-def main() -> None:
+def main() -> int:
+    started_at = time.monotonic()
     args = parse_args()
-    pages = max(1, args.pages)
-    sources = set(args.sources or ("tmdb-movies", "tmdb-tv", "jikan-anime"))
-    records, failures = collect_contents(pages=pages, sources=sources, strict=args.strict)
+    settings = get_settings()
+    configure_logging(settings)
+    pages = max(1, args.pages or settings.import_pages)
+    selected = set(args.source or ("tmdb-movies", "tmdb-series", "mal-anime"))
+    LOGGER.info("Pipeline Batch 1 dimulai untuk %s halaman", pages)
 
-    for source, message in failures.items():
-        print(f"Provider failed [{source}]: {message}", file=sys.stderr)
+    try:
+        uploader = None
+        if not args.dry_run:
+            client = get_supabase_client(settings)
+            uploader = SupabaseUploader(
+                client,
+                retries=settings.request_retries,
+                batch_size=settings.import_batch_size,
+            )
+    except Exception as error:
+        LOGGER.exception("Inisialisasi Supabase gagal")
+        print(f"Pipeline dihentikan: {error}", file=sys.stderr)
+        return 1
 
-    if not records:
-        raise SystemExit("Import stopped: no provider returned usable content")
+    results: list[ImportResult] = []
+    if "tmdb-movies" in selected:
+        results.append(import_tmdb_movies(settings, pages=pages, uploader=uploader))
+    if "tmdb-series" in selected:
+        results.append(import_tmdb_series(settings, pages=pages, uploader=uploader))
+    if "mal-anime" in selected:
+        results.append(import_mal_anime(settings, pages=pages, uploader=uploader))
 
-    if args.output:
-        output_path = Path(args.output)
-        with output_path.open("w", encoding="utf-8") as output:
-            for record in records:
-                output.write(json.dumps(record.to_dict(), ensure_ascii=False) + "\n")
+    counts = {result.label: result.imported for result in results}
+    total = sum(counts.values())
+    elapsed = time.monotonic() - started_at
+    for result in results:
+        LOGGER.info(
+            "%s selesai: imported=%s normalized=%s failed=%s provider_error=%s",
+            result.label,
+            result.imported,
+            result.normalized,
+            result.failed,
+            result.provider_error or "none",
+        )
+    LOGGER.info("Pipeline selesai: total=%s durasi=%.2fs", total, elapsed)
 
-    if args.dry_run:
-        print(f"Dry run completed: {len(records)} normalized contents")
-        return
-
-    imported = upsert_contents(
-        [record.to_dict() for record in records],
-        batch_size=max(1, args.batch_size),
-    )
-    print(f"Import completed: {imported} contents upserted")
+    mode = "DRY RUN COMPLETED" if args.dry_run else "IMPORT COMPLETED"
+    print("\n=========================")
+    print(mode)
+    print(f"\nMovies imported: {counts.get('Movies', 0)}")
+    print(f"Series imported: {counts.get('Series', 0)}")
+    print(f"Anime imported: {counts.get('Anime', 0)}")
+    print(f"Total: {total}")
+    print(f"Execution time: {elapsed:.2f}s")
+    print("=========================")
+    return 0 if total > 0 else 1
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

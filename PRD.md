@@ -26,7 +26,7 @@ The product succeeds when a user can describe a mood, theme, character archetype
 | Type | Primary source | Important metadata |
 | --- | --- | --- |
 | Movie | TMDB | director, cast, runtime, themes |
-| Anime | Jikan / MyAnimeList | MAL ID, studio, episodes, season, source material |
+| Anime | MyAnimeList API v2 | MAL ID, studio, episodes, season, source material |
 | K-Drama | TMDB TV | country, language, episodes, relationship and emotional themes |
 | TV Series | TMDB TV | seasons, episodes, studio, cast |
 | Documentary | TMDB | subject, theme, runtime, director |
@@ -95,5 +95,5 @@ Watchlist, ratings, watch progress, completion status, skips, and assistant memo
 - The hybrid score is `0.6 * content similarity + 0.4 * collaborative score`.
 - Anime, K-drama, and cross-category recommendation tests pass.
 - D1 and PostgreSQL-compatible models express the universal content schema.
-- TMDB and Jikan normalization pipelines are present.
+- TMDB and official MyAnimeList normalization pipelines are present.
 - API contracts and architecture are documented.

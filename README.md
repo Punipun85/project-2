@@ -47,16 +47,17 @@ python -m unittest discover -s ml-service/tests -v
 ```bash
 pip install -r data-pipeline/requirements.txt
 copy data-pipeline\.env.example data-pipeline\.env
-python data-pipeline/main.py --pages 1 --dry-run --output normalized-contents.ndjson
+python data-pipeline/main.py --pages 1 --dry-run
 python data-pipeline/main.py --pages 1
 ```
 
-The pipeline imports TMDB popular/top-rated movies and TV series plus Jikan top
-anime, normalizes every item to the Supabase `contents` schema, deduplicates by
+The pipeline imports TMDB popular/top-rated movies and TV series plus top and
+seasonal anime from the official MyAnimeList API, normalizes every item to the
+Supabase `contents` schema, deduplicates by
 `(source, external_id)`, and performs bounded service-role upserts. Use repeated
-`--source` flags to run only `tmdb-movies`, `tmdb-tv`, or `jikan-anime`.
+`--source` flags to run only `tmdb-movies`, `tmdb-series`, or `mal-anime`.
 
-TMDB synchronization requires `TMDB_API_KEY`; Supabase writes require
+TMDB synchronization requires `TMDB_API_KEY`, MAL requires `MAL_CLIENT_ID`, and Supabase writes require
 `SUPABASE_URL` and a server-only `SUPABASE_KEY`. Never expose the service-role
 key to frontend code. The AI service uses
 `OLLAMA_CHAT_URL` and `OLLAMA_MODEL`. The optional remote fallback uses
