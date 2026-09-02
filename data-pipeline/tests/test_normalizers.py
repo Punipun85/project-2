@@ -97,8 +97,8 @@ class NormalizerTests(unittest.TestCase):
                 "studios": [{"id": 858, "name": "Wit Studio"}],
                 "num_episodes": 25,
                 "average_episode_duration": 1440,
-                "start_date": "2013-04-07",
-                "start_season": {"year": 2013, "season": "spring"},
+                "start_date": "2020-12-07",
+                "start_season": {"year": 2021, "season": "winter"},
                 "media_type": "tv",
                 "mean": 8.6,
                 "num_scoring_users": 3900000,
@@ -112,8 +112,21 @@ class NormalizerTests(unittest.TestCase):
         self.assertEqual(record.series_type, "anime_series")
         self.assertEqual(record.title, "Attack on Titan")
         self.assertEqual(record.duration_minutes, 24)
+        self.assertEqual(record.release_year, 2020)
         self.assertEqual(record.rating_average, 8.6)
         self.assertEqual(record.characters, [])
+
+    def test_mal_short_duration_is_rounded_to_one_minute(self) -> None:
+        record = normalize_mal_anime(
+            {
+                "id": 48442,
+                "title": "Shikaru Neko",
+                "media_type": "tv",
+                "average_episode_duration": 30,
+            }
+        )
+
+        self.assertEqual(record.duration_minutes, 1)
 
 
 if __name__ == "__main__":

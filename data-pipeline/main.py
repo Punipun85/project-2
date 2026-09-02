@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import sys
 import time
@@ -23,7 +24,7 @@ from processors.normalizer import (
     normalize_tmdb_movie,
     normalize_tmdb_series,
 )
-from sources.mal_anime import MalAnimeClient, get_anime_detail, get_seasonal_anime, get_top_anime
+from sources.mal_anime import MalAnimeClient, get_seasonal_anime, get_top_anime
 from sources.tmdb_movie import (
     create_client as create_tmdb_movie_client,
     get_movie_detail,
@@ -39,6 +40,7 @@ from sources.tmdb_series import (
 
 
 LOGGER = logging.getLogger("nexaplay.pipeline")
+REPORT_FILE = PIPELINE_ROOT / "logs" / "import_report.json"
 
 
 @dataclass
@@ -92,6 +94,8 @@ def import_tmdb_movies(
         )
         result.normalized = len(records)
         result.imported = uploader.upload_batch(records) if uploader else len(records)
+        if uploader:
+            result.failed += uploader.failed_count
     except Exception as error:
         result.provider_error = str(error)
         LOGGER.exception("TMDB Movie gagal; pipeline melanjutkan provider berikutnya")
@@ -124,6 +128,8 @@ def import_tmdb_series(
         )
         result.normalized = len(records)
         result.imported = uploader.upload_batch(records) if uploader else len(records)
+        if uploader:
+            result.failed += uploader.failed_count
     except Exception as error:
         result.provider_error = str(error)
         LOGGER.exception("TMDB Series gagal; pipeline melanjutkan provider berikutnya")
@@ -148,14 +154,13 @@ def import_mal_anime(
             ),
             result,
         )
-        records = _normalize_details(
-            raw,
-            lambda content_id: get_anime_detail(content_id, client=client),
-            normalize_mal_anime,
-            result,
-        )
+        # Ranking and seasonal calls already request MAL_DETAIL_FIELDS, so they
+        # can be normalized directly without one extra API call per anime.
+        records = _normalize_records(raw, normalize_mal_anime, result)
         result.normalized = len(records)
         result.imported = uploader.upload_batch(records) if uploader else len(records)
+        if uploader:
+            result.failed += uploader.failed_count
     except Exception as error:
         result.provider_error = str(error)
         LOGGER.exception("MyAnimeList gagal; pipeline provider lain tetap dipertahankan")
@@ -204,9 +209,30 @@ def _normalize_details(
     return normalized
 
 
+def _normalize_records(
+    raw_records: dict[str, dict[str, Any]],
+    normalizer: Callable[[dict[str, Any]], ContentRecord],
+    result: ImportResult,
+) -> list[ContentRecord]:
+    normalized: list[ContentRecord] = []
+    for content_id, raw in raw_records.items():
+        try:
+            normalized.append(normalizer(raw))
+        except (ValidationError, ValueError, TypeError) as error:
+            result.failed += 1
+            LOGGER.error("Record %s tidak valid dan dilewati: %s", content_id, error)
+        except Exception as error:
+            result.failed += 1
+            LOGGER.error("Record %s gagal diproses dan dilewati: %s", content_id, error)
+    return normalized
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--pages", type=int, help="Jumlah halaman per list provider")
+    parser.add_argument("--pages", type=int, help="Override jumlah halaman untuk semua provider")
+    parser.add_argument("--movie-pages", type=int, help="Override MOVIE_PAGES")
+    parser.add_argument("--series-pages", type=int, help="Override SERIES_PAGES")
+    parser.add_argument("--anime-pages", type=int, help="Override ANIME_PAGES")
     parser.add_argument(
         "--source",
         action="append",
@@ -217,14 +243,65 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def build_import_report(
+    results: list[ImportResult],
+    *,
+    additional_failures: int = 0,
+) -> dict[str, int]:
+    counts = {result.label: result.imported for result in results}
+    failed = additional_failures + sum(
+        result.failed + (1 if result.provider_error else 0) for result in results
+    )
+    total = sum(counts.values())
+    return {
+        "tmdb_movies": counts.get("Movies", 0),
+        "tmdb_series": counts.get("Series", 0),
+        "mal_anime": counts.get("Anime", 0),
+        "failed": failed,
+        "total_imported": total,
+    }
+
+
+def save_import_report(
+    results: list[ImportResult],
+    *,
+    path: Path = REPORT_FILE,
+    additional_failures: int = 0,
+) -> dict[str, int]:
+    report = build_import_report(results, additional_failures=additional_failures)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    LOGGER.info("Import report disimpan ke %s", path)
+    return report
+
+
+def print_import_report(report: dict[str, int]) -> None:
+    print("\n============================")
+    print("NEXAPLAY AI BATCH 1 REPORT")
+    print(f"\nTMDB MOVIES:\n{report['tmdb_movies']}")
+    print(f"\nTMDB SERIES:\n{report['tmdb_series']}")
+    print(f"\nMAL ANIME:\n{report['mal_anime']}")
+    print(f"\nFAILED:\n{report['failed']}")
+    print(f"\nTOTAL IMPORTED:\n{report['total_imported']}")
+    print("\n============================")
+
+
 def main() -> int:
     started_at = time.monotonic()
     args = parse_args()
     settings = get_settings()
     configure_logging(settings)
-    pages = max(1, args.pages or settings.import_pages)
+    movie_pages = max(1, args.movie_pages or args.pages or settings.movie_pages)
+    series_pages = max(1, args.series_pages or args.pages or settings.series_pages)
+    anime_pages = max(1, args.anime_pages or args.pages or settings.anime_pages)
     selected = set(args.source or ("tmdb-movies", "tmdb-series", "mal-anime"))
-    LOGGER.info("Pipeline Batch 1 dimulai untuk %s halaman", pages)
+    print("Pipeline Batch 1 started")
+    LOGGER.info(
+        "Pipeline Batch 1 dimulai: movie_pages=%s series_pages=%s anime_pages=%s",
+        movie_pages,
+        series_pages,
+        anime_pages,
+    )
 
     try:
         uploader = None
@@ -238,18 +315,23 @@ def main() -> int:
     except Exception as error:
         LOGGER.exception("Inisialisasi Supabase gagal")
         print(f"Pipeline dihentikan: {error}", file=sys.stderr)
+        report = save_import_report([], additional_failures=1)
+        print_import_report(report)
         return 1
 
     results: list[ImportResult] = []
     if "tmdb-movies" in selected:
-        results.append(import_tmdb_movies(settings, pages=pages, uploader=uploader))
+        print("Importing TMDB movies...")
+        results.append(import_tmdb_movies(settings, pages=movie_pages, uploader=uploader))
     if "tmdb-series" in selected:
-        results.append(import_tmdb_series(settings, pages=pages, uploader=uploader))
+        print("Importing TMDB series...")
+        results.append(import_tmdb_series(settings, pages=series_pages, uploader=uploader))
     if "mal-anime" in selected:
-        results.append(import_mal_anime(settings, pages=pages, uploader=uploader))
+        print("Importing MyAnimeList anime...")
+        results.append(import_mal_anime(settings, pages=anime_pages, uploader=uploader))
 
-    counts = {result.label: result.imported for result in results}
-    total = sum(counts.values())
+    report = save_import_report(results)
+    total = report["total_imported"]
     elapsed = time.monotonic() - started_at
     for result in results:
         LOGGER.info(
@@ -262,15 +344,10 @@ def main() -> int:
         )
     LOGGER.info("Pipeline selesai: total=%s durasi=%.2fs", total, elapsed)
 
-    mode = "DRY RUN COMPLETED" if args.dry_run else "IMPORT COMPLETED"
-    print("\n=========================")
-    print(mode)
-    print(f"\nMovies imported: {counts.get('Movies', 0)}")
-    print(f"Series imported: {counts.get('Series', 0)}")
-    print(f"Anime imported: {counts.get('Anime', 0)}")
-    print(f"Total: {total}")
+    print_import_report(report)
     print(f"Execution time: {elapsed:.2f}s")
-    print("=========================")
+    if args.dry_run:
+        print("Mode: dry run (tidak ada data yang ditulis)")
     return 0 if total > 0 else 1
 
 

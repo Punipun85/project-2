@@ -31,6 +31,9 @@ class Settings(BaseModel):
     tmdb_request_delay: float = Field(default=0.05, ge=0)
     mal_request_delay: float = Field(default=0.20, ge=0)
     import_pages: int = Field(default=1, ge=1)
+    movie_pages: int = Field(default=50, ge=1, le=500)
+    series_pages: int = Field(default=50, ge=1, le=500)
+    anime_pages: int = Field(default=10, ge=1, le=500)
     import_batch_size: int = Field(default=100, ge=1, le=100)
     cast_limit: int = Field(default=20, ge=1, le=100)
     log_level: str = "INFO"
@@ -62,6 +65,7 @@ class Settings(BaseModel):
     @classmethod
     def from_environment(cls) -> "Settings":
         load_dotenv(ENV_FILE)
+        legacy_pages = os.getenv("IMPORT_PAGES")
         return cls(
             tmdb_api_key=os.getenv("TMDB_API_KEY"),
             mal_client_id=os.getenv("MAL_CLIENT_ID"),
@@ -75,8 +79,11 @@ class Settings(BaseModel):
             request_retries=os.getenv("REQUEST_RETRIES", "4"),
             tmdb_request_delay=os.getenv("TMDB_REQUEST_DELAY", "0.05"),
             mal_request_delay=os.getenv("MAL_REQUEST_DELAY", "0.20"),
-            import_pages=os.getenv("IMPORT_PAGES", "1"),
-            import_batch_size=os.getenv("IMPORT_BATCH_SIZE", "100"),
+            import_pages=legacy_pages or "1",
+            movie_pages=os.getenv("MOVIE_PAGES", legacy_pages or "50"),
+            series_pages=os.getenv("SERIES_PAGES", legacy_pages or "50"),
+            anime_pages=os.getenv("ANIME_PAGES", legacy_pages or "10"),
+            import_batch_size=os.getenv("BATCH_SIZE", os.getenv("IMPORT_BATCH_SIZE", "100")),
             cast_limit=os.getenv("CAST_LIMIT", "20"),
             log_level=os.getenv("LOG_LEVEL", "INFO"),
         )

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import unittest
 
+from postgrest.exceptions import APIError
+
 from database.uploader import SupabaseUploader
 
 
@@ -69,6 +71,43 @@ class UploaderTests(unittest.TestCase):
             {"source": "MAL", "external_id": "1", "title": "Different provider"},
             uploaded_rows,
         )
+
+    def test_invalid_record_isolated_without_blocking_valid_records(self) -> None:
+        class SelectiveQuery:
+            def __init__(self, rows):
+                self.rows = rows
+
+            def execute(self):
+                if any(row["external_id"] == "bad" for row in self.rows):
+                    raise APIError(
+                        {
+                            "message": "check constraint violation",
+                            "code": "23514",
+                            "hint": None,
+                            "details": None,
+                        }
+                    )
+                return self
+
+        class SelectiveTable:
+            def upsert(self, rows, **options):
+                return SelectiveQuery(rows)
+
+        class SelectiveClient:
+            def table(self, name):
+                return SelectiveTable()
+
+        uploader = SupabaseUploader(SelectiveClient())
+        imported = uploader.upload_batch(
+            [
+                {"source": "MAL", "external_id": "good", "title": "Valid"},
+                {"source": "MAL", "external_id": "bad", "title": "Invalid"},
+            ]
+        )
+
+        self.assertEqual(imported, 1)
+        self.assertEqual(uploader.failed_count, 1)
+        self.assertEqual(uploader.failed_records, ["MAL:bad"])
 
 
 if __name__ == "__main__":

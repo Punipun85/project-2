@@ -19,7 +19,9 @@ data-pipeline/
 ├── database/
 │   ├── supabase_client.py
 │   └── uploader.py
-├── logs/pipeline.log
+├── logs/
+│   ├── pipeline.log
+│   └── import_report.json
 ├── processors/normalizer.py
 ├── sources/
 │   ├── http_client.py
@@ -53,6 +55,10 @@ MAL_CLIENT_ID=...
 MAL_CLIENT_SECRET=...
 SUPABASE_URL=https://PROJECT.supabase.co
 SUPABASE_KEY=SERVICE_ROLE_KEY
+BATCH_SIZE=100
+MOVIE_PAGES=50
+SERIES_PAGES=50
+ANIME_PAGES=10
 ```
 
 Gunakan Supabase service-role key hanya di pipeline backend. Jangan kirim key tersebut ke browser atau commit ke Git.
@@ -69,16 +75,22 @@ MAL_REDIRECT_URI=
 
 ## Menjalankan pipeline
 
-Impor semua provider, satu halaman untuk setiap daftar:
+Impor semua provider memakai jumlah halaman dari `.env`:
 
 ```bash
 python main.py
 ```
 
-Ambil lebih banyak halaman:
+Override semua jumlah halaman untuk satu eksekusi:
 
 ```bash
 python main.py --pages 5
+```
+
+Atur setiap provider secara terpisah melalui `.env` atau CLI:
+
+```bash
+python main.py --movie-pages 50 --series-pages 50 --anime-pages 10
 ```
 
 Jalankan provider tertentu saja:
@@ -93,7 +105,7 @@ Uji API dan normalisasi tanpa menulis ke Supabase:
 python main.py --dry-run
 ```
 
-Log lengkap disimpan di `logs/pipeline.log`. Kegagalan satu provider dicatat dan tidak membatalkan provider lain.
+Log lengkap disimpan di `logs/pipeline.log`. Ringkasan terbaru disimpan sebagai JSON di `logs/import_report.json`. Kegagalan satu provider dicatat dan tidak membatalkan provider lain.
 
 ## Pemetaan database
 
@@ -116,15 +128,29 @@ Untuk MAL, `media_type` dipetakan ke `anime_series`, `anime_movie`, atau `ova`.
 ## Contoh output
 
 ```text
-=========================
-IMPORT COMPLETED
+Pipeline Batch 1 started
+Importing TMDB movies...
+Importing TMDB series...
+Importing MyAnimeList anime...
 
-Movies imported: 40
-Series imported: 40
-Anime imported: 180
-Total: 260
-Execution time: 76.42s
-=========================
+============================
+NEXAPLAY AI BATCH 1 REPORT
+
+TMDB MOVIES:
+1000
+
+TMDB SERIES:
+1000
+
+MAL ANIME:
+500
+
+FAILED:
+0
+
+TOTAL IMPORTED:
+2500
+============================
 ```
 
 ## Testing

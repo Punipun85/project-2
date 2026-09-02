@@ -48,8 +48,9 @@ class MalAnimeClient:
         self.settings = settings or get_settings()
         client_id = self.settings.require_mal()
         headers = {"X-MAL-CLIENT-ID": client_id}
-        if self.settings.mal_access_token:
-            headers["Authorization"] = f"Bearer {self.settings.mal_access_token}"
+        access_token = get_access_token(self.settings)
+        if access_token:
+            headers["Authorization"] = f"Bearer {access_token}"
         self.api = JsonApiClient(
             base_url=MAL_API_BASE_URL,
             timeout=self.settings.http_timeout_seconds,
@@ -69,8 +70,31 @@ class MalAnimeClient:
             ):
                 raise
             token = refresh_access_token(self.settings, self.settings.mal_refresh_token)
-            self.api.session.headers["Authorization"] = f"Bearer {token['access_token']}"
+            self.settings.mal_access_token = str(token["access_token"])
+            if token.get("refresh_token"):
+                self.settings.mal_refresh_token = str(token["refresh_token"])
+            self.api.session.headers["Authorization"] = f"Bearer {self.settings.mal_access_token}"
             return self.api.get(path, params=params)
+
+
+def get_access_token(settings: Settings | None = None) -> str | None:
+    """Return a configured token or refresh it for unattended OAuth sessions.
+
+    MAL's public catalog endpoints can use ``X-MAL-CLIENT-ID`` without a user
+    token, so ``None`` is a valid result when OAuth has not been configured.
+    """
+
+    config = settings or get_settings()
+    config.require_mal()
+    if config.mal_access_token:
+        return config.mal_access_token
+    if not config.mal_refresh_token:
+        return None
+    token = refresh_access_token(config, config.mal_refresh_token)
+    config.mal_access_token = str(token["access_token"])
+    if token.get("refresh_token"):
+        config.mal_refresh_token = str(token["refresh_token"])
+    return config.mal_access_token
 
 
 def get_top_anime(

@@ -7,8 +7,10 @@ from collections import defaultdict
 from collections.abc import Iterable
 from typing import Any
 
+import httpx
+from postgrest.exceptions import APIError
 from supabase import Client
-from tenacity import Retrying, retry_if_exception_type, stop_after_attempt, wait_exponential_jitter
+from tenacity import Retrying, retry_if_exception, stop_after_attempt, wait_exponential_jitter
 
 from config.settings import Settings, get_settings
 from database.supabase_client import get_supabase_client
@@ -27,13 +29,18 @@ class SupabaseUploader:
         self.client = client
         self.retries = max(1, retries)
         self.batch_size = max(1, min(batch_size, MAX_BATCH_SIZE))
+        self.failed_count = 0
+        self.failed_records: list[str] = []
 
     def upload_content(self, record: ContentRecord | dict[str, Any]) -> int:
         return self.upload_batch([record])
 
     def upload_batch(self, records: Iterable[ContentRecord | dict[str, Any]]) -> int:
+        self.failed_count = 0
+        self.failed_records = []
         payloads = _deduplicate(records)
         if not payloads:
+            LOGGER.info("Tidak ada record untuk di-upload")
             return 0
 
         uploaded = 0
@@ -46,15 +53,41 @@ class SupabaseUploader:
         for group in by_shape.values():
             for offset in range(0, len(group), self.batch_size):
                 batch = group[offset : offset + self.batch_size]
-                self._execute_upsert(batch)
-                uploaded += len(batch)
+                uploaded += self._upload_resilient(batch)
+        LOGGER.info("Total Supabase upsert berhasil: %s record", uploaded)
+        if self.failed_count:
+            LOGGER.error("Total record Supabase gagal: %s", self.failed_count)
         return uploaded
+
+    def _upload_resilient(self, batch: list[dict[str, Any]]) -> int:
+        try:
+            self._execute_upsert(batch)
+            LOGGER.info("Supabase upsert berhasil: %s record", len(batch))
+            return len(batch)
+        except APIError as error:
+            if not _is_record_data_error(error):
+                raise
+            if len(batch) > 1:
+                midpoint = len(batch) // 2
+                return self._upload_resilient(batch[:midpoint]) + self._upload_resilient(batch[midpoint:])
+
+            row = batch[0]
+            key = f"{row.get('source')}:{row.get('external_id')}"
+            self.failed_count += 1
+            self.failed_records.append(key)
+            LOGGER.error(
+                "Record Supabase gagal dan dilewati [%s]: code=%s message=%s",
+                key,
+                getattr(error, "code", "unknown"),
+                getattr(error, "message", "database constraint violation"),
+            )
+            return 0
 
     def _execute_upsert(self, batch: list[dict[str, Any]]) -> None:
         retrying = Retrying(
             stop=stop_after_attempt(self.retries),
             wait=wait_exponential_jitter(initial=0.5, max=15),
-            retry=retry_if_exception_type(Exception),
+            retry=retry_if_exception(_is_transient_upload_error),
             reraise=True,
             before_sleep=lambda state: LOGGER.warning(
                 "Retry upload Supabase setelah error: %s",
@@ -103,7 +136,9 @@ def upload_batch(
 
 def _deduplicate(records: Iterable[ContentRecord | dict[str, Any]]) -> list[dict[str, Any]]:
     unique: dict[tuple[str, str], dict[str, Any]] = {}
+    received = 0
     for record in records:
+        received += 1
         payload = record.to_supabase() if isinstance(record, ContentRecord) else dict(record)
         source = str(payload.get("source") or "").strip().upper()
         external_id = str(payload.get("external_id") or "").strip()
@@ -114,4 +149,18 @@ def _deduplicate(records: Iterable[ContentRecord | dict[str, Any]]) -> list[dict
         payload["external_id"] = external_id
         payload["title"] = title
         unique[(source, external_id)] = payload
+    duplicate_count = received - len(unique)
+    if duplicate_count:
+        LOGGER.info("Melewati %s record duplikat dalam batch", duplicate_count)
     return list(unique.values())
+
+
+def _is_transient_upload_error(error: BaseException) -> bool:
+    return isinstance(error, (httpx.TransportError, ConnectionError, TimeoutError))
+
+
+def _is_record_data_error(error: APIError) -> bool:
+    code = str(getattr(error, "code", "") or "")
+    if not code and error.args and isinstance(error.args[0], dict):
+        code = str(error.args[0].get("code") or "")
+    return code.startswith(("22", "23"))

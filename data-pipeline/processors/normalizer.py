@@ -210,7 +210,7 @@ def normalize_mal_anime(anime: dict[str, Any]) -> ContentRecord:
         country=["Japan"],
         release_date=release_date,
         release_year=_mal_release_year(anime, release_date),
-        duration_minutes=round(duration_seconds / 60) if duration_seconds else None,
+        duration_minutes=_seconds_to_positive_minutes(duration_seconds),
         number_of_episodes=_nonnegative_optional_int(anime.get("num_episodes")),
         studio=_named_objects(anime.get("studios")),
         characters=_normalize_people(anime.get("characters")),
@@ -406,11 +406,17 @@ def _release_year(release_date: str | None) -> int | None:
 
 
 def _mal_release_year(anime: dict[str, Any], release_date: str | None) -> int | None:
+    # Supabase requires release_year to match release_date. MAL occasionally
+    # labels a December premiere as the following winter season, so the actual
+    # start date must take precedence over start_season.year.
+    date_year = _release_year(release_date)
+    if date_year is not None:
+        return date_year
     start_season = anime.get("start_season") if isinstance(anime.get("start_season"), dict) else {}
     year = start_season.get("year")
     if isinstance(year, int):
         return year
-    return _release_year(release_date)
+    return None
 
 
 def _optional_float(value: object) -> float | None:
@@ -438,3 +444,9 @@ def _nonnegative_optional_int(value: object) -> int | None:
 def _positive_int(value: object) -> int | None:
     parsed = _nonnegative_optional_int(value)
     return parsed if parsed and parsed > 0 else None
+
+
+def _seconds_to_positive_minutes(seconds: int | None) -> int | None:
+    if not seconds or seconds <= 0:
+        return None
+    return max(1, (seconds + 59) // 60)
