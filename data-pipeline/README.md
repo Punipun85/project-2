@@ -2,6 +2,10 @@
 
 Pipeline Python 3.12+ ini mengumpulkan metadata inti untuk film, serial, drama Asia, serial streaming, dan anime. Semua provider dinormalisasi ke tabel Supabase `contents` dengan natural key `(source, external_id)` sehingga eksekusi berulang tidak membuat duplikat.
 
+Batch 2A menambahkan Character Knowledge Layer sebagai enrichment terpisah.
+Pipeline Batch 1 dan tabel `contents` tidak diubah: karakter dinormalisasi ke
+`characters`, lalu kemunculannya dihubungkan melalui `content_characters`.
+
 Batch ini hanya mencakup:
 
 - TMDB Movie: popular, top rated, detail, credits.
@@ -113,7 +117,56 @@ Setiap record mengisi kolom Batch 1 pada tabel `contents`: identitas provider, k
 
 Nilai scalar yang tidak tersedia tidak dikirim sehingga Supabase dapat memakai `NULL` atau mempertahankan data lama. Kolom JSON memakai array kosong agar sesuai constraint JSONB. Anime selalu memakai `source = MAL`; Jikan tidak digunakan.
 
-Catatan: MyAnimeList API v2 resmi saat ini tidak menyediakan endpoint karakter anime. Karena Batch 1 dilarang memakai Jikan atau sumber lain, `characters` untuk MAL disimpan sebagai array kosong sampai provider resmi mendukungnya atau Batch berikutnya menambahkan sumber enrichment.
+Catatan: Batch 1 tidak mengandalkan data karakter MyAnimeList karena respons
+resminya tidak memenuhi kontrak voice actor yang dibutuhkan. Karena Batch 1
+dilarang memakai sumber enrichment lain, `characters` untuk MAL tetap berupa
+array kosong. Batch 2A mengisinya secara terpisah melalui AniList.
+
+## Batch 2A — Character Knowledge Layer
+
+Sumber enrichment:
+
+- Film: IMDb non-commercial `title.principals.tsv.gz`, dengan
+  `name.basics.tsv.gz` sebagai lookup nama aktor dan TMDB external IDs sebagai
+  pemetaan dari catalog existing.
+- Series: TMDB `/tv/{id}/credits`, kemudian TVMaze bila TMDB tidak memiliki
+  karakter yang dapat digunakan.
+- Anime: AniList GraphQL menggunakan `contents.external_id` MAL sebagai
+  `idMal`, termasuk role dan voice actor Jepang. Label legacy `JIKAN` hanya
+  diterima untuk memetakan record lama; semua data karakter tetap diambil dari
+  AniList dan pipeline ini tidak memanggil Jikan.
+
+IMDb menerbitkan file besar dan memperbaruinya setiap hari. Eksekusi penuh akan
+mengunduh serta menyimpan cache di `data-pipeline/data/imdb`; pastikan penggunaan
+dataset mematuhi lisensi non-commercial IMDb.
+
+Jalankan dari folder `data-pipeline`:
+
+```powershell
+python -m character_pipeline.main_character_pipeline --dry-run --limit 1
+python -m character_pipeline.main_character_pipeline
+```
+
+Provider dapat dijalankan terpisah dan kegagalan salah satu provider tidak
+menghentikan provider lain:
+
+```powershell
+python -m character_pipeline.main_character_pipeline --source tmdb-series
+python -m character_pipeline.main_character_pipeline --source anilist-anime
+```
+
+Untuk memakai cache IMDb yang sudah tersedia:
+
+```powershell
+python -m character_pipeline.main_character_pipeline `
+  --source imdb-movies `
+  --imdb-principals-path C:\data\title.principals.tsv.gz `
+  --imdb-names-path C:\data\name.basics.tsv.gz
+```
+
+Log tersimpan di `logs/character_pipeline.log` dan ringkasan terakhir di
+`logs/character_report.json`. Pipeline ini belum membuat embedding, personality
+extraction, similarity model, atau fitur AI lainnya.
 
 `series_type` ditentukan otomatis dengan urutan:
 

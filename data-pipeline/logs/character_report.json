@@ -1,0 +1,10 @@
+{
+  "movies_processed": 1,
+  "series_processed": 1,
+  "anime_processed": 1,
+  "characters_created": 0,
+  "relationships_created": 0,
+  "duplicate_count": 0,
+  "skipped_records": 0,
+  "errors": 0
+}

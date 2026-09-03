@@ -1,0 +1,5 @@
+2026-09-03 20:36:22,791 | INFO | character_pipeline.tmdb_character_importer | TMDB credits content=3 records=13
+2026-09-03 20:36:31,257 | INFO | character_pipeline.anilist_character_importer | AniList content=2 records=87
+2026-09-03 20:36:32,288 | INFO | character_pipeline.character_uploader | Character upload selesai: characters_created=0 relationships_created=0 duplicates=0 failed=0
+2026-09-03 20:36:32,290 | INFO | nexaplay.character_pipeline | Character report disimpan ke C:\Users\Lenovo\.vscode\coding\project\website jual\project 2\data-pipeline\logs\character_report.json
+2026-09-03 20:36:32,290 | INFO | nexaplay.character_pipeline | Character pipeline selesai dalam 12.17s
