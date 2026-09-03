@@ -1,11 +1,9 @@
-import { env } from "cloudflare:workers";
-
-import { createSupabaseConfig, type SupabaseEnvironment } from "@/lib/supabase/config";
+import { createSupabaseConfig } from "@/lib/supabase/config";
 import { authFetch, sessionResponse, type SupabaseSession } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as
-    | { email?: string; password?: string; username?: string }
+    | { email?: string; password?: string; username?: string; fullName?: string }
     | null;
   if (!body?.email?.trim() || !body.password || body.password.length < 8) {
     return Response.json(
@@ -13,13 +11,16 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
-  const config = createSupabaseConfig(env as unknown as SupabaseEnvironment);
+  const config = createSupabaseConfig();
   const response = await authFetch(config, "signup", {
     method: "POST",
     body: JSON.stringify({
       email: body.email.trim(),
       password: body.password,
-      data: { username: body.username?.trim() || undefined },
+      data: {
+        username: body.username?.trim() || body.fullName?.trim() || undefined,
+        full_name: body.fullName?.trim() || body.username?.trim() || undefined,
+      },
     }),
   });
   const payload = (await response.json().catch(() => ({}))) as SupabaseSession & {

@@ -1,10 +1,8 @@
-import { env } from "cloudflare:workers";
-
-import { createSupabaseConfig, type SupabaseEnvironment } from "@/lib/supabase/config";
+import { createSupabaseConfig } from "@/lib/supabase/config";
 import { accessToken, authFetch, clearSessionResponse } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
-  const config = createSupabaseConfig(env as unknown as SupabaseEnvironment);
+  const config = createSupabaseConfig();
   const token = accessToken(request);
   if (token && config.isConfigured) {
     await authFetch(config, "logout", {
@@ -12,5 +10,5 @@ export async function POST(request: Request) {
       headers: { authorization: `Bearer ${token}` },
     }).catch(() => null);
   }
-  return clearSessionResponse();
+  return clearSessionResponse(request);
 }

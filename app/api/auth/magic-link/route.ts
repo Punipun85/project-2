@@ -1,6 +1,4 @@
-import { env } from "cloudflare:workers";
-
-import { createSupabaseConfig, type SupabaseEnvironment } from "@/lib/supabase/config";
+import { createSupabaseConfig } from "@/lib/supabase/config";
 import { authFetch } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
@@ -8,7 +6,7 @@ export async function POST(request: Request) {
   if (!body?.email?.trim()) {
     return Response.json({ error: "Email is required" }, { status: 400 });
   }
-  const config = createSupabaseConfig(env as unknown as SupabaseEnvironment);
+  const config = createSupabaseConfig();
   const response = await authFetch(config, "otp", {
     method: "POST",
     body: JSON.stringify({

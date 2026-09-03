@@ -16,6 +16,8 @@ export type SupabaseSession = {
   user?: SupabaseUser;
 };
 
+type CookieWriter = Pick<Response, "headers">;
+
 function parseCookies(request: Request): Map<string, string> {
   const cookies = new Map<string, string>();
   for (const segment of (request.headers.get("cookie") ?? "").split(";")) {
@@ -50,11 +52,7 @@ export async function authFetch(
   });
 }
 
-export function sessionResponse(
-  session: SupabaseSession,
-  body: unknown = { user: session.user ?? null },
-): Response {
-  const response = Response.json(body);
+export function appendSessionCookies(response: CookieWriter, session: SupabaseSession): void {
   const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
   const maxAge = Math.max(session.expires_in ?? 3600, 60);
   response.headers.append(
@@ -65,10 +63,18 @@ export function sessionResponse(
     "set-cookie",
     `${REFRESH_COOKIE}=${encodeURIComponent(session.refresh_token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000${secure}`,
   );
+}
+
+export function sessionResponse(
+  session: SupabaseSession,
+  body: unknown = { user: session.user ?? null },
+): Response {
+  const response = Response.json(body);
+  appendSessionCookies(response, session);
   return response;
 }
 
-export function clearSessionResponse(): Response {
+export function clearSessionResponse(request?: Request): Response {
   const response = Response.json({ success: true });
   response.headers.append(
     "set-cookie",
@@ -78,6 +84,13 @@ export function clearSessionResponse(): Response {
     "set-cookie",
     `${REFRESH_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`,
   );
+  if (request) {
+    for (const name of parseCookies(request).keys()) {
+      if (name.startsWith("sb-") && (name.includes("auth-token") || name.includes("code-verifier"))) {
+        response.headers.append("set-cookie", `${name}=; Path=/; SameSite=Lax; Max-Age=0`);
+      }
+    }
+  }
   return response;
 }
 
@@ -118,6 +131,26 @@ export async function restFetch(
       "content-type": "application/json",
       ...init.headers,
     },
+  });
+}
+
+export async function ensureIdentityProfile(
+  config: SupabaseConfig,
+  session: SupabaseSession,
+): Promise<void> {
+  if (!session.user?.id || !session.access_token) return;
+  const metadata = session.user.user_metadata ?? {};
+  const fullName = metadata.full_name ?? metadata.name ?? metadata.username;
+  const avatarUrl = metadata.avatar_url ?? metadata.picture;
+  await restFetch(config, session.access_token, "profiles?on_conflict=id", {
+    method: "POST",
+    headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
+    body: JSON.stringify({
+      id: session.user.id,
+      email: session.user.email ?? null,
+      full_name: typeof fullName === "string" ? fullName : null,
+      avatar_url: typeof avatarUrl === "string" ? avatarUrl : null,
+    }),
   });
 }
 

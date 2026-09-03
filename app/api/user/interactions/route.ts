@@ -1,6 +1,4 @@
-import { env } from "cloudflare:workers";
-
-import { createSupabaseConfig, type SupabaseEnvironment } from "@/lib/supabase/config";
+import { createSupabaseConfig } from "@/lib/supabase/config";
 import {
   requireSupabaseUser,
   resolveContentId,
@@ -10,7 +8,7 @@ import {
 const eventTypes = new Set(["view", "click", "watchlist", "complete", "rating", "search", "chat"]);
 
 export async function POST(request: Request) {
-  const supabase = createSupabaseConfig(env as unknown as SupabaseEnvironment);
+  const supabase = createSupabaseConfig();
   const session = await requireSupabaseUser(request, supabase);
   if (!session) return Response.json({ error: "Authentication required" }, { status: 401 });
   const body = (await request.json().catch(() => null)) as

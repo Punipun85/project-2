@@ -87,7 +87,7 @@ test("server-renders the EntertainmentAI dashboard", async () => {
   assert.match(html, /Your universe/);
   assert.match(html, /Attack on Titan/);
   assert.match(html, /Ask Lumi/);
-  assert.match(html, /http:\/\/localhost:8788\/og\.png/);
+  assert.match(html, /https?:\/\/[^"]+\/og\.png/);
   assert.doesNotMatch(
     html,
     /Your site is taking shape|react-loading-skeleton|entertainmentai\.invalid/,

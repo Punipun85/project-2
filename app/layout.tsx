@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { getSiteUrl } from "@/lib/site-config";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,7 +16,7 @@ const geistMono = Geist_Mono({
 const title = "EntertainmentAI - Every story universe, intelligently curated";
 const description =
   "Personalized recommendations and natural-language discovery across movies, anime, K-dramas, TV series, and documentaries.";
-const metadataOrigin = "https://entertainmentai.invalid";
+const metadataOrigin = getSiteUrl();
 
 export const metadata: Metadata = {
   title,

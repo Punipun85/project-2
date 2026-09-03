@@ -1,9 +1,7 @@
-import { env } from "cloudflare:workers";
-
 import { contentTypes, type ContentType } from "@/db/schema";
 import { listContents } from "@/lib/content-service";
 import { defaultProfile, rankForUser } from "@/lib/recommendation";
-import { createSupabaseConfig, type SupabaseEnvironment } from "@/lib/supabase/config";
+import { createSupabaseConfig } from "@/lib/supabase/config";
 import { requireSupabaseUser, restFetch } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
@@ -17,7 +15,7 @@ export async function GET(request: Request) {
 
   let profile = defaultProfile;
   let personalized = false;
-  const supabase = createSupabaseConfig(env as unknown as SupabaseEnvironment);
+  const supabase = createSupabaseConfig();
   const session = await requireSupabaseUser(request, supabase);
   if (session) {
     const query = new URLSearchParams({ select: "favorite_genres,favorite_types,favorite_moods", id: `eq.${session.user.id}`, limit: "1" });

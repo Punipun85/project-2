@@ -1,11 +1,9 @@
-import { env } from "cloudflare:workers";
-
 import { listContents } from "@/lib/content-service";
 import {
   buildRecommendationMessages,
   requestAIChat,
 } from "@/lib/ai/client";
-import { createAIConfig, type AIEnvironment } from "@/lib/ai/config";
+import { createAIConfig } from "@/lib/ai/config";
 import { classifyAITask } from "@/lib/ai/router";
 import { detectIntent, semanticSearch } from "@/lib/recommendation";
 
@@ -35,7 +33,7 @@ export async function POST(request: Request) {
   }));
   const taskType = classifyAITask(message);
   const ai = await requestAIChat({
-    config: createAIConfig(env as unknown as AIEnvironment),
+    config: createAIConfig(),
     taskType,
     messages: buildRecommendationMessages(message, candidates),
   });

@@ -1,6 +1,4 @@
-import { env } from "cloudflare:workers";
-
-import { createSupabaseConfig, type SupabaseEnvironment } from "@/lib/supabase/config";
+import { createSupabaseConfig } from "@/lib/supabase/config";
 import {
   requireSupabaseUser,
   resolveContentId,
@@ -8,7 +6,7 @@ import {
 } from "@/lib/supabase/server";
 
 function config() {
-  return createSupabaseConfig(env as unknown as SupabaseEnvironment);
+  return createSupabaseConfig();
 }
 
 export async function GET(request: Request) {

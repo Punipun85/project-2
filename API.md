@@ -92,8 +92,9 @@ The response includes detected intent, semantic score, final score, and an expla
 
 The provider order is Ollama, an optional OpenAI-compatible remote API, then the
 deterministic hybrid explanation. The remote API requires
-`REMOTE_AI_BASE_URL`, `REMOTE_AI_API_KEY`, and `REMOTE_AI_MODEL`; its provider
-value is `openai-compatible`.
+`REMOTE_AI_BASE_URL`, `REMOTE_AI_API_KEY`, `REMOTE_AI_DEFAULT_MODEL`,
+`REMOTE_AI_REASONING_MODEL`, and `REMOTE_AI_FALLBACK_MODEL`; its provider value
+is `openai-compatible`.
 
 ## Preferences
 

@@ -1,3 +1,5 @@
+import { readRuntimeEnv } from "@/lib/runtime-env";
+
 export type AIEnvironment = {
   REMOTE_AI_BASE_URL?: string;
   REMOTE_AI_API_KEY?: string;
@@ -22,8 +24,7 @@ const REASONING_MODEL = "cx/gpt-5.6-sol";
 const FALLBACK_MODEL = "cx/gpt-5.6-terra";
 
 function processEnvironment(): AIEnvironment {
-  if (typeof process === "undefined") return {};
-  return process.env as AIEnvironment;
+  return readRuntimeEnv() as AIEnvironment;
 }
 
 function clean(value: string | undefined, fallback = ""): string {

@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 
 app = FastAPI(title="EntertainmentAI LLM Service", version="1.0.0")
-OLLAMA_CHAT_URL = os.getenv("OLLAMA_CHAT_URL", "http://localhost:11434/api/chat")
+OLLAMA_CHAT_URL = os.getenv("OLLAMA_CHAT_URL", "http://ASUS:11434/api/chat")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:3b")
 REMOTE_AI_BASE_URL = os.getenv("REMOTE_AI_BASE_URL", "")
 REMOTE_AI_API_KEY = os.getenv("REMOTE_AI_API_KEY", "")

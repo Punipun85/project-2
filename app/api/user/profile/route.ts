@@ -1,6 +1,4 @@
-import { env } from "cloudflare:workers";
-
-import { createSupabaseConfig, type SupabaseEnvironment } from "@/lib/supabase/config";
+import { createSupabaseConfig } from "@/lib/supabase/config";
 import { requireSupabaseUser, restFetch } from "@/lib/supabase/server";
 
 const allowedGenres = new Set(["Action", "Romance", "Fantasy", "Sci-Fi", "Horror", "Comedy"]);
@@ -10,7 +8,7 @@ const cleanList = (value: unknown, allowed: Set<string>) =>
   Array.isArray(value) ? value.map(String).filter((item) => allowed.has(item)) : [];
 
 export async function GET(request: Request) {
-  const config = createSupabaseConfig(env as unknown as SupabaseEnvironment);
+  const config = createSupabaseConfig();
   const session = await requireSupabaseUser(request, config);
   if (!session) return Response.json({ error: "Authentication required" }, { status: 401 });
   const query = new URLSearchParams({ select: "*", id: `eq.${session.user.id}`, limit: "1" });
@@ -20,7 +18,7 @@ export async function GET(request: Request) {
 }
 
 export async function PUT(request: Request) {
-  const config = createSupabaseConfig(env as unknown as SupabaseEnvironment);
+  const config = createSupabaseConfig();
   const session = await requireSupabaseUser(request, config);
   if (!session) return Response.json({ error: "Authentication required" }, { status: 401 });
   const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;

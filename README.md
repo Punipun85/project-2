@@ -11,15 +11,16 @@ npm run dev
 
 Open `http://localhost:3000`.
 
-Local Cloudflare development reads Ollama settings from `.dev.vars`. The configured
-endpoint is `http://ASUS:11434/api/chat` with model `qwen2.5:3b`. Copy
-`.dev.vars.example` when setting up another machine.
+Local development can read variables from `.dev.vars`, `.env.local`, or the
+shell environment. Copy `.dev.vars.example` for the Cloudflare Sites runtime or
+`.env.vercel.example` when preparing a Vercel deployment.
 
 Lumi uses a resilient provider chain: Ollama first, then an optional
 OpenAI-compatible remote API, then deterministic hybrid explanations. Configure
-the remote provider with `REMOTE_AI_BASE_URL`, `REMOTE_AI_API_KEY`, and
-`REMOTE_AI_MODEL`. The prepared base URL is `https://ai.punipuni.my.id/v1`;
-its key and model ID are intentionally not committed.
+the remote provider with `REMOTE_AI_BASE_URL`, `REMOTE_AI_API_KEY`,
+`REMOTE_AI_DEFAULT_MODEL`, `REMOTE_AI_REASONING_MODEL`, and
+`REMOTE_AI_FALLBACK_MODEL`. Set `NEXT_PUBLIC_SITE_URL` to the final production
+domain so metadata and link previews use the custom domain correctly.
 
 ```bash
 npm run build
@@ -61,7 +62,8 @@ TMDB synchronization requires `TMDB_API_KEY`, MAL requires `MAL_CLIENT_ID`, and 
 `SUPABASE_URL` and a server-only `SUPABASE_KEY`. Never expose the service-role
 key to frontend code. The AI service uses
 `OLLAMA_CHAT_URL` and `OLLAMA_MODEL`. The optional remote fallback uses
-`REMOTE_AI_BASE_URL`, `REMOTE_AI_API_KEY`, and `REMOTE_AI_MODEL`.
+`REMOTE_AI_BASE_URL`, `REMOTE_AI_API_KEY`, `REMOTE_AI_DEFAULT_MODEL`,
+`REMOTE_AI_REASONING_MODEL`, and `REMOTE_AI_FALLBACK_MODEL`.
 
 See [PRD.md](./PRD.md), [TDD.md](./TDD.md), [ARCHITECTURE.md](./ARCHITECTURE.md), and [API.md](./API.md) for the product and technical contracts.
 

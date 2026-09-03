@@ -1,6 +1,4 @@
-import { env } from "cloudflare:workers";
-
-import { createSupabaseConfig, type SupabaseEnvironment } from "@/lib/supabase/config";
+import { createSupabaseConfig } from "@/lib/supabase/config";
 import { authFetch, sessionResponse, type SupabaseSession } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
@@ -10,7 +8,7 @@ export async function POST(request: Request) {
   if (!body?.email?.trim() || !body.password) {
     return Response.json({ error: "Email and password are required" }, { status: 400 });
   }
-  const config = createSupabaseConfig(env as unknown as SupabaseEnvironment);
+  const config = createSupabaseConfig();
   const response = await authFetch(config, "token?grant_type=password", {
     method: "POST",
     body: JSON.stringify({ email: body.email.trim(), password: body.password }),
