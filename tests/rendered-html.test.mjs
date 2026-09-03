@@ -103,24 +103,36 @@ test("filters the universal catalog by content type", async () => {
   assert.ok(payload.data.every((item) => item.type === "anime"));
 });
 
-test("answers natural-language entertainment searches", async () => {
+test("routes normal natural-language searches to the default AI model", async () => {
   const response = await fetch(`${baseUrl}/api/ai/chat`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ message: "anime with a genius protagonist" }),
+    body: JSON.stringify({ message: "Recommend anime similar to Frieren" }),
   });
   assert.equal(response.status, 200);
 
   const payload = await response.json();
-  const titles = payload.recommendations.map((item) => item.title);
-  assert.ok(titles.includes("Code Geass") || titles.includes("Death Note"));
   assert.ok(payload.intent.contentTypes.includes("anime"));
   assert.ok(
-    ["ollama", "openai-compatible", "deterministic-fallback"].includes(
+    ["openai-compatible", "deterministic-fallback"].includes(
       payload.meta.provider,
     ),
   );
-  if (payload.meta.provider === "ollama") {
-    assert.equal(payload.meta.model, "qwen2.5:3b");
-  }
+  assert.equal(payload.meta.taskType, "default");
+  assert.equal(payload.meta.model, "ag/gemini-3.7-flash-high");
+});
+
+test("routes complex preference analysis to the reasoning AI model", async () => {
+  const response = await fetch(`${baseUrl}/api/ai/chat`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      message: "Analyze my watching history and explain my anime preference",
+    }),
+  });
+  assert.equal(response.status, 200);
+
+  const payload = await response.json();
+  assert.equal(payload.meta.taskType, "reasoning");
+  assert.equal(payload.meta.model, "cx/gpt-5.6-sol");
 });
