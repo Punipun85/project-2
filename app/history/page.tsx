@@ -1,5 +1,5 @@
 import { NexaApplicationPage } from "@/components/application/nexa-application-page";
 
-export default function HomePage() {
-  return <NexaApplicationPage page="home" />;
+export default function HistoryPage() {
+  return <NexaApplicationPage page="history" />;
 }

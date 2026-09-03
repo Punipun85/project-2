@@ -5,3 +5,7 @@ REMOTE_AI_API_KEY=
 REMOTE_AI_DEFAULT_MODEL=ag/gemini-3.7-flash-high
 REMOTE_AI_REASONING_MODEL=cx/gpt-5.6-sol
 REMOTE_AI_FALLBACK_MODEL=cx/gpt-5.6-terra
+
+# Public Supabase anon key; do not use the service-role key here.
+SUPABASE_URL=https://ljcfbcpymbiyeyqlnqam.supabase.co
+SUPABASE_ANON_KEY=

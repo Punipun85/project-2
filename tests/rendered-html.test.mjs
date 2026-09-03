@@ -136,3 +136,56 @@ test("routes complex preference analysis to the reasoning AI model", async () =>
   assert.equal(payload.meta.taskType, "reasoning");
   assert.equal(payload.meta.model, "cx/gpt-5.6-sol");
 });
+
+test("renders every Batch 4 application page", async () => {
+  const pages = new Map([
+    ["/discover", "Discover every universe"],
+    ["/search", "Search by title, meaning, or character"],
+    ["/recommendations", "Recommended for you"],
+    ["/ai-chat", "Ask Lumi"],
+    ["/profile", "Your taste dashboard"],
+    ["/watchlist", "Your watchlist"],
+    ["/history", "History.*continue watching"],
+  ]);
+
+  for (const [path, copy] of pages) {
+    const response = await fetch(`${baseUrl}${path}`, {
+      headers: { accept: "text/html" },
+    });
+    assert.equal(response.status, 200, path);
+    assert.match(await response.text(), new RegExp(copy, "i"), path);
+  }
+});
+
+test("provides Supabase email, password, and magic-link authentication UI", async () => {
+  const response = await fetch(`${baseUrl}/auth`, {
+    headers: { accept: "text/html" },
+  });
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /Sign in/i);
+  assert.match(html, /Create account/i);
+  assert.match(html, /Magic link/i);
+});
+
+test("protects onboarding, watchlist, and history APIs without a Supabase session", async () => {
+  const calls = [
+    fetch(`${baseUrl}/api/user/profile`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ favoriteGenres: ["Action"], onboardingCompleted: true }),
+    }),
+    fetch(`${baseUrl}/api/user/watchlist`),
+    fetch(`${baseUrl}/api/user/history`),
+  ];
+  const responses = await Promise.all(calls);
+  assert.ok(responses.every((response) => response.status === 401));
+});
+
+test("returns a safe unauthenticated Supabase session state", async () => {
+  const response = await fetch(`${baseUrl}/api/auth/session`);
+  assert.equal(response.status, 200);
+  const payload = await response.json();
+  assert.equal(payload.user, null);
+  assert.equal(typeof payload.configured, "boolean");
+});

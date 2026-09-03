@@ -46,6 +46,7 @@ export async function POST(request: Request) {
     recommendations: matches.map((match) => ({
       id: match.content.id,
       title: match.content.title,
+      poster: match.content.posterUrl,
       type: match.content.type,
       score: Number(match.finalScore.toFixed(4)),
       reason: match.reason,
