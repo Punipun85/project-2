@@ -1,4 +1,4 @@
-import type { ContentType, EntertainmentContent } from "./catalog";
+import type { ContentType, EntertainmentContent } from "./content-types";
 import { getAppEnvironment } from "./env";
 import { createSupabaseConfig } from "./supabase/config";
 

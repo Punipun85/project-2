@@ -1,5 +1,5 @@
-import { contentTypes, type ContentType } from "@/db/schema";
 import { listContents } from "@/lib/content-service";
+import { contentTypes, type ContentType } from "@/lib/content-types";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);

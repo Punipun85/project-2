@@ -1,4 +1,5 @@
-import type { EntertainmentContent } from "@/lib/catalog";
+import type { EntertainmentContent } from "@/lib/content-types";
+import { getAppEnvironment } from "@/lib/env";
 import { getContentById } from "@/lib/content-service";
 import { resolveProviderTrailer } from "@/lib/provider-trailers";
 import { createSupabaseConfig } from "@/lib/supabase/config";
@@ -158,7 +159,9 @@ export async function getContentExperience(
       creators: base.director ? [{ name: base.director, role: "Director" }] : [],
       writers: [],
       castCredits: base.cast.map((name) => ({ name })),
-      characters: CURATED_CHARACTER_FALLBACKS[base.externalId] ?? [],
+      characters: getAppEnvironment() === "production"
+        ? []
+        : CURATED_CHARACTER_FALLBACKS[base.externalId] ?? [],
       userState: emptyState,
     };
   }

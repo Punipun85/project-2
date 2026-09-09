@@ -1,6 +1,6 @@
 "use client";
 
-import type { EntertainmentContent } from "@/lib/catalog";
+import type { EntertainmentContent } from "@/lib/content-types";
 import { ContentCard } from "./content-card";
 
 export function RecommendationCard(props: {

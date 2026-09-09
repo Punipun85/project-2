@@ -1,38 +1,14 @@
-export type ContentType =
-  | "movie"
-  | "anime"
-  | "kdrama"
-  | "series"
-  | "documentary";
+import {
+  contentTypeLabels,
+  type ContentType,
+  type EntertainmentContent,
+} from "./content-types";
 
-export type EntertainmentContent = {
-  id: string;
-  externalId: string;
-  provider: "tmdb" | "jikan" | "internal";
-  type: ContentType;
-  title: string;
-  originalTitle?: string;
-  description: string;
-  posterUrl: string;
-  backdropUrl: string;
-  genres: string[];
-  themes: string[];
-  language: string;
-  country: string;
-  releaseYear: number;
-  duration?: number;
-  episodes?: number;
-  season?: string;
-  studio?: string;
-  sourceMaterial?: string;
-  director?: string;
-  cast: string[];
-  rating: number;
-  popularity: number;
-  match: number;
-  reason: string;
-  progress?: number;
-};
+export {
+  contentTypeLabels,
+  type ContentType,
+  type EntertainmentContent,
+} from "./content-types";
 
 const unsplash = (id: string) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=900&q=84`;
@@ -391,14 +367,6 @@ export const catalog: EntertainmentContent[] = [
     reason: "A real-world story with the tension and impossible stakes of your favorite dramas.",
   },
 ];
-
-export const contentTypeLabels: Record<ContentType, string> = {
-  movie: "Movie",
-  anime: "Anime",
-  kdrama: "K-Drama",
-  series: "TV Series",
-  documentary: "Documentary",
-};
 
 export function contentSubtitle(content: EntertainmentContent): string {
   const length = content.episodes

@@ -2,7 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { Bookmark, Heart, Play, Sparkles, Star } from "lucide-react";
-import type { EntertainmentContent } from "@/lib/catalog";
+import type { EntertainmentContent } from "@/lib/content-types";
 
 export function ContentCard({
   item,
@@ -21,9 +21,13 @@ export function ContentCard({
   onFavorite?: () => void;
   showReason?: boolean;
 }) {
+  const openContent = onOpen ?? (() => {
+    window.location.assign(`/content/${encodeURIComponent(item.id)}`);
+  });
+
   return (
     <article className="content-card batch4-card">
-      <button className="poster-button" onClick={onOpen} aria-label={`Open ${item.title}`}>
+      <button className="poster-button" onClick={openContent} aria-label={`Open ${item.title}`}>
         <div className="poster-frame">
           <img className="content-poster" src={item.posterUrl} alt={`${item.title} poster`} />
           <div className="poster-shade" />
@@ -34,7 +38,7 @@ export function ContentCard({
       </button>
       <div className="card-copy">
         <div className="card-title-row">
-          <button className="card-title" onClick={onOpen}>{item.title}</button>
+          <button className="card-title" onClick={openContent}>{item.title}</button>
           {onFavorite && (
             <button className={`save-button ${favorite ? "saved" : ""}`} onClick={onFavorite} aria-label={`${favorite ? "Remove" : "Add"} ${item.title} ${favorite ? "from" : "to"} favorites`}>
               <Heart size={14} fill={favorite ? "currentColor" : "none"} />
