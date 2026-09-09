@@ -1,4 +1,4 @@
-import type { ContentType, EntertainmentContent } from "@/lib/catalog";
+import type { ContentType, EntertainmentContent } from "@/lib/content-types";
 import {
   getEnvironmentValue,
   readRuntimeEnv,
@@ -97,7 +97,8 @@ function first(value: unknown, fallback = "Unknown"): string {
 
 function normalizeType(row: RecommendationRow): ContentType {
   if (row.content_type === "series" && row.series_type === "kdrama") return "kdrama";
-  if (["movie", "anime", "series", "documentary"].includes(row.content_type ?? "")) {
+  if (row.content_type === "tv_series") return "series";
+  if (["movie", "anime", "kdrama", "series", "documentary"].includes(row.content_type ?? "")) {
     return row.content_type as ContentType;
   }
   return "movie";
