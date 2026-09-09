@@ -1,4 +1,4 @@
-import { readRuntimeEnv } from "@/lib/runtime-env";
+import { getEnvironmentValue, readRuntimeEnv } from "@/lib/env";
 
 export type SupabaseEnvironment = {
   SUPABASE_URL?: string;
@@ -14,8 +14,8 @@ export type SupabaseConfig = Readonly<{
 export function createSupabaseConfig(
   environment: SupabaseEnvironment = readRuntimeEnv() as SupabaseEnvironment,
 ): SupabaseConfig {
-  const url = environment.SUPABASE_URL?.trim().replace(/\/$/, "") ?? "";
-  const anonKey = environment.SUPABASE_ANON_KEY?.trim() ?? "";
+  const url = getEnvironmentValue("SUPABASE_URL", environment).replace(/\/$/, "");
+  const anonKey = getEnvironmentValue("SUPABASE_ANON_KEY", environment);
   return Object.freeze({
     url,
     anonKey,

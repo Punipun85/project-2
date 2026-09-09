@@ -3,6 +3,7 @@ import {
   authFetch,
   ensureIdentityProfile,
   getSupabaseUser,
+  onboardingDestination,
   sessionResponse,
   type SupabaseSession,
 } from "@/lib/supabase/server";
@@ -28,5 +29,6 @@ export async function POST(request: Request) {
   }
   body.user = (await validation.json()) as SupabaseSession["user"];
   await ensureIdentityProfile(config, body).catch(() => null);
-  return sessionResponse(body);
+  const next = await onboardingDestination(config, body);
+  return sessionResponse(body, { user: body.user, next });
 }

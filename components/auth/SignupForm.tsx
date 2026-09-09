@@ -37,8 +37,9 @@ export function SignupForm({ config }: { config: PublicSupabaseConfig }) {
       });
       if (authError) throw authError;
       if (data.session) {
-        await fetch("/api/auth/session", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(data.session) });
-        window.location.assign("/dashboard");
+        const response = await fetch("/api/auth/session", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(data.session) });
+        const sessionResult = await response.json();
+        window.location.assign(sessionResult.next ?? "/onboarding");
         return;
       }
       setSuccess(true);

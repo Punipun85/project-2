@@ -1,4 +1,5 @@
 import type { SupabaseConfig } from "./config";
+import { getEnvironmentValue } from "@/lib/env";
 
 const ACCESS_COOKIE = "nexaplay_access_token";
 const REFRESH_COOKIE = "nexaplay_refresh_token";
@@ -53,7 +54,7 @@ export async function authFetch(
 }
 
 export function appendSessionCookies(response: CookieWriter, session: SupabaseSession): void {
-  const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
+  const secure = getEnvironmentValue("NODE_ENV") === "production" ? "; Secure" : "";
   const maxAge = Math.max(session.expires_in ?? 3600, 60);
   response.headers.append(
     "set-cookie",
@@ -154,6 +155,44 @@ export async function ensureIdentityProfile(
   });
 }
 
+export async function onboardingDestination(
+  config: SupabaseConfig,
+  session: SupabaseSession,
+  completedDestination = "/dashboard",
+): Promise<string> {
+  if (!session.user?.id || !session.access_token) return "/onboarding";
+  const query = new URLSearchParams({
+    select: "onboarding_completed",
+    user_id: `eq.${session.user.id}`,
+    limit: "1",
+  });
+  const response = await restFetch(
+    config,
+    session.access_token,
+    `user_preferences?${query}`,
+  );
+  if (!response.ok) return "/onboarding";
+  const rows = (await response.json()) as Array<{ onboarding_completed?: boolean }>;
+  if (rows[0]?.onboarding_completed) return completedDestination;
+  if (rows.length === 0) {
+    const legacyQuery = new URLSearchParams({
+      select: "onboarding_completed",
+      id: `eq.${session.user.id}`,
+      limit: "1",
+    });
+    const legacyResponse = await restFetch(
+      config,
+      session.access_token,
+      `user_profiles?${legacyQuery}`,
+    );
+    if (legacyResponse.ok) {
+      const legacyRows = (await legacyResponse.json()) as Array<{ onboarding_completed?: boolean }>;
+      if (legacyRows[0]?.onboarding_completed) return completedDestination;
+    }
+  }
+  return "/onboarding";
+}
+
 export async function resolveContentId(
   config: SupabaseConfig,
   token: string,
@@ -163,11 +202,16 @@ export async function resolveContentId(
     return Number(input.contentId);
   }
   if (!input.externalId) return null;
-  const source = input.provider?.toLowerCase() === "jikan" ? "JIKAN" : "TMDB";
+  const provider = input.provider?.toLowerCase();
+  const sourceFilter = provider === "mal"
+    ? "eq.MAL"
+    : provider === "jikan"
+      ? "in.(MAL,JIKAN)"
+      : "eq.TMDB";
   const query = new URLSearchParams({
     select: "id",
     external_id: `eq.${input.externalId}`,
-    source: `eq.${source}`,
+    source: sourceFilter,
     limit: "1",
   });
   const response = await restFetch(config, token, `contents?${query}`);

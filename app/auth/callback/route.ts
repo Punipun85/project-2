@@ -1,6 +1,6 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { createSupabaseConfig } from "@/lib/supabase/config";
-import { appendSessionCookies, ensureIdentityProfile } from "@/lib/supabase/server";
+import { appendSessionCookies, ensureIdentityProfile, onboardingDestination } from "@/lib/supabase/server";
 
 type CookieEntry = { name: string; value: string; options?: CookieOptions };
 
@@ -63,7 +63,8 @@ export async function GET(request: Request) {
   }
 
   await ensureIdentityProfile(config, sessionData.session).catch(() => null);
-  const response = Response.redirect(new URL(destination, requestUrl.origin), 303);
+  const next = await onboardingDestination(config, sessionData.session, destination);
+  const response = Response.redirect(new URL(next, requestUrl.origin), 303);
   for (const cookie of responseCookies) response.headers.append("set-cookie", serializeCookie(cookie));
   appendSessionCookies(response, sessionData.session);
   return response;

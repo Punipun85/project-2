@@ -39,7 +39,8 @@ export function LoginForm({ config, initialError = "" }: { config: PublicSupabas
         body: JSON.stringify(data.session),
       });
       if (!response.ok) throw new Error("We could not create your secure session.");
-      window.location.assign("/dashboard");
+      const sessionResult = await response.json();
+      window.location.assign(sessionResult.next ?? "/dashboard");
     } catch (authError) {
       setError(friendlyAuthError(authError, "Sign-in failed. Please try again."));
     } finally {

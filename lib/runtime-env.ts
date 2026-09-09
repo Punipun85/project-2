@@ -1,9 +1,3 @@
-export type RuntimeEnvironment = Record<string, string | undefined>;
-
-export function readRuntimeEnv(): RuntimeEnvironment {
-  if (typeof process === "undefined" || !process.env) {
-    return {};
-  }
-
-  return process.env as RuntimeEnvironment;
-}
+/** @deprecated Import environment helpers from `@/lib/env`. */
+export { readRuntimeEnv } from "@/lib/env";
+export type { RuntimeEnvironment } from "@/lib/env";
