@@ -6,8 +6,10 @@ import { ContentCard } from "./content-card";
 export function RecommendationCard(props: {
   item: EntertainmentContent;
   saved?: boolean;
+  favorite?: boolean;
   onOpen?: () => void;
   onWatchlist?: () => void;
+  onFavorite?: () => void;
 }) {
   return (
     <div className="recommendation-card">

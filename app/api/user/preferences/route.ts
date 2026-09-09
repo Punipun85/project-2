@@ -1,79 +1,60 @@
-import { eq } from "drizzle-orm";
-import { getDb } from "@/db";
-import { userPreferences, users } from "@/db/schema";
-import { defaultProfile } from "@/lib/recommendation";
+import { PERSONALIZATION_GENRES, refreshUserPersonalization } from "@/lib/personalization";
+import { createSupabaseConfig } from "@/lib/supabase/config";
+import { requireSupabaseUser, restFetch } from "@/lib/supabase/server";
 
-const json = (value: unknown) => JSON.stringify(value ?? []);
+const GENRES = [...PERSONALIZATION_GENRES];
+const TYPES = ["Movie", "Anime", "Series"];
+const MOODS = ["Dark", "Emotional", "Funny", "Relaxing"];
+const clean = (value: unknown, allowed: string[]) =>
+  Array.isArray(value) ? [...new Set(value.map(String).filter((item) => allowed.includes(item)))] : [];
 
 export async function GET(request: Request) {
-  const userId = new URL(request.url).searchParams.get("userId") ?? "demo-user";
-
-  try {
-    const db = getDb();
-    const rows = await db
-      .select()
-      .from(userPreferences)
-      .where(eq(userPreferences.userId, userId))
-      .limit(1);
-    if (rows[0]) return Response.json({ data: rows[0] });
-  } catch {
-    // A fresh local preview uses the default profile until D1 is initialized.
-  }
-
-  return Response.json({ data: { userId, ...defaultProfile }, meta: { persisted: false } });
+  const config = createSupabaseConfig();
+  const session = await requireSupabaseUser(request, config);
+  if (!session) return Response.json({ error: "Authentication required" }, { status: 401 });
+  const query = new URLSearchParams({ select: "*", user_id: `eq.${session.user.id}`, limit: "1" });
+  const response = await restFetch(config, session.token, `user_preferences?${query}`);
+  const payload = response.ok ? await response.json() : [];
+  return Response.json({ data: payload[0] ?? null }, { status: response.status });
 }
 
 export async function PUT(request: Request) {
-  const body = (await request.json().catch(() => null)) as
-    | {
-        userId?: string;
-        name?: string;
-        email?: string;
-        favoriteContentTypes?: string[];
-        preferredLanguages?: string[];
-        favoriteGenres?: string[];
-        favoriteCountries?: string[];
-        dislikedGenres?: string[];
-        moodProfile?: Record<string, unknown>;
-      }
-    | null;
-
-  if (!body?.userId) {
-    return Response.json({ error: "userId is required" }, { status: 400 });
+  const config = createSupabaseConfig();
+  const session = await requireSupabaseUser(request, config);
+  if (!session) return Response.json({ error: "Authentication required" }, { status: 401 });
+  const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
+  if (!body) return Response.json({ error: "Invalid preferences" }, { status: 400 });
+  const favoriteGenres = clean(body.favoriteGenres, GENRES);
+  if (favoriteGenres.length < 3) {
+    return Response.json({ error: "Select at least 3 favorite genres" }, { status: 400 });
   }
-
-  try {
-    const db = getDb();
-    await db
-      .insert(users)
-      .values({
-        id: body.userId,
-        name: body.name ?? "EntertainmentAI User",
-        email: body.email ?? `${body.userId}@local.entertainment.ai`,
-      })
-      .onConflictDoNothing();
-
-    const values = {
-      userId: body.userId,
-      favoriteContentTypes: json(body.favoriteContentTypes),
-      preferredLanguages: json(body.preferredLanguages),
-      favoriteGenres: json(body.favoriteGenres),
-      favoriteCountries: json(body.favoriteCountries),
-      dislikedGenres: json(body.dislikedGenres),
-      moodProfile: json(body.moodProfile ?? {}),
-      updatedAt: new Date().toISOString(),
-    };
-
-    await db
-      .insert(userPreferences)
-      .values(values)
-      .onConflictDoUpdate({ target: userPreferences.userId, set: values });
-
-    return Response.json({ data: values, meta: { persisted: true } });
-  } catch (error) {
-    return Response.json(
-      { error: "Persistence is unavailable", detail: error instanceof Error ? error.message : "Unknown error" },
-      { status: 503 },
-    );
-  }
+  const values = {
+    user_id: session.user.id,
+    favorite_genres: favoriteGenres,
+    favorite_types: clean(body.favoriteTypes, TYPES),
+    favorite_moods: clean(body.favoriteMoods, MOODS),
+    disliked_genres: clean(body.dislikedGenres, GENRES),
+    onboarding_completed: body.onboardingCompleted !== false,
+  };
+  const response = await restFetch(config, session.token, "user_preferences?on_conflict=user_id", {
+    method: "POST",
+    headers: { Prefer: "resolution=merge-duplicates,return=representation" },
+    body: JSON.stringify(values),
+  });
+  if (!response.ok) return Response.json({ error: await response.json().catch(() => null) }, { status: response.status });
+  await restFetch(config, session.token, "user_profiles?on_conflict=id", {
+    method: "POST",
+    headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
+    body: JSON.stringify({
+      id: session.user.id,
+      username: typeof body.username === "string" ? body.username.trim().slice(0, 60) : null,
+      favorite_genres: values.favorite_genres,
+      favorite_types: values.favorite_types,
+      favorite_moods: values.favorite_moods,
+      onboarding_completed: values.onboarding_completed,
+    }),
+  });
+  const personalization = await refreshUserPersonalization(config, session.token, session.user.id);
+  const payload = await response.json();
+  return Response.json({ data: payload[0] ?? values, personalization });
 }

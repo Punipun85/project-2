@@ -4,7 +4,7 @@ import { Check, Sparkles } from "lucide-react";
 import { useState } from "react";
 
 const options = {
-  favoriteGenres: ["Action", "Romance", "Fantasy", "Sci-Fi", "Horror", "Comedy"],
+  favoriteGenres: ["Action", "Fantasy", "Sci-Fi", "Romance", "Comedy", "Horror", "Drama", "Mystery"],
   favoriteTypes: ["Movie", "Anime", "Series"],
   favoriteMoods: ["Dark", "Emotional", "Funny", "Relaxing"],
 };
@@ -39,8 +39,12 @@ export function ProfilePreference({
     }));
   };
   const save = async () => {
+    if (value.favoriteGenres.length < 3) {
+      setStatus("Select at least 3 favorite genres");
+      return;
+    }
     setStatus("Saving…");
-    const response = await fetch("/api/user/profile", {
+    const response = await fetch("/api/user/preferences", {
       method: "PUT",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ ...value, onboardingCompleted: true }),

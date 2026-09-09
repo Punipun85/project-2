@@ -1,7 +1,5 @@
-import { and, desc, eq, like } from "drizzle-orm";
-import { getDb } from "@/db";
-import { contents } from "@/db/schema";
-import { catalog, type ContentType, type EntertainmentContent } from "./catalog";
+import type { ContentType, EntertainmentContent } from "./catalog";
+import { getAppEnvironment } from "./env";
 import { createSupabaseConfig } from "./supabase/config";
 
 type ContentFilters = {
@@ -43,7 +41,10 @@ function parseUnknownText(value: unknown): string | undefined {
   return undefined;
 }
 
-function normalizeSupabaseType(value: unknown): ContentType {
+function normalizeSupabaseType(value: unknown, seriesType?: unknown): ContentType {
+  if (String(value).toLowerCase() === "series" && String(seriesType).toLowerCase() === "kdrama") {
+    return "kdrama";
+  }
   switch (String(value ?? "").toLowerCase()) {
     case "anime":
       return "anime";
@@ -59,41 +60,12 @@ function normalizeSupabaseType(value: unknown): ContentType {
   }
 }
 
-function toContent(row: typeof contents.$inferSelect): EntertainmentContent {
-  return {
-    id: String(row.id),
-    externalId: row.externalId,
-    provider: row.provider === "jikan" ? "jikan" : row.provider === "internal" ? "internal" : "tmdb",
-    type: row.type,
-    title: row.title,
-    originalTitle: row.originalTitle ?? undefined,
-    description: row.description,
-    posterUrl: row.posterUrl ?? "",
-    backdropUrl: row.backdropUrl ?? row.posterUrl ?? "",
-    genres: parseArray(row.genre),
-    themes: parseArray(row.themes),
-    language: row.language ?? "Unknown",
-    country: row.country ?? "Unknown",
-    releaseYear: Number(row.releaseDate?.slice(0, 4) ?? 0),
-    duration: row.duration ?? undefined,
-    episodes: row.episodes ?? undefined,
-    season: row.season ?? undefined,
-    studio: row.studio ?? undefined,
-    sourceMaterial: row.sourceMaterial ?? undefined,
-    director: row.director ?? undefined,
-    cast: parseArray(row.cast),
-    rating: row.rating,
-    popularity: row.popularity,
-    match: Math.round(Math.min(99, row.rating * 10 + row.popularity * 0.08)),
-    reason: `Recommended because it matches your ${row.type} and ${parseArray(row.genre)[0] ?? "story"} preferences.`,
-  };
-}
-
 type SupabaseContentRow = {
   id: number | string;
   external_id: string;
   source: string;
   content_type: string;
+  series_type?: string | null;
   title: string;
   original_title?: string | null;
   overview?: string | null;
@@ -105,14 +77,62 @@ type SupabaseContentRow = {
   country?: unknown;
   release_year?: number | null;
   duration_minutes?: number | null;
-  episodes?: number | null;
+  number_of_episodes?: number | null;
+  number_of_seasons?: number | null;
   season_number?: number | null;
   studio?: unknown;
   director?: unknown;
   cast?: unknown;
   rating_average?: number | null;
   popularity_score?: number | null;
+  trailer_url?: string | null;
 };
+
+export class ContentServiceError extends Error {
+  constructor(
+    message: string,
+    public readonly code: "not_configured" | "request_failed" | "invalid_response",
+  ) {
+    super(message);
+    this.name = "ContentServiceError";
+  }
+}
+
+function usesProductionDataPath(): boolean {
+  return getAppEnvironment() === "production";
+}
+
+async function developmentCatalog(): Promise<EntertainmentContent[]> {
+  if (usesProductionDataPath()) return [];
+  const module = await import("./catalog");
+  return module.catalog;
+}
+
+function filterContents(
+  items: EntertainmentContent[],
+  filters: ContentFilters,
+  limit: number,
+): EntertainmentContent[] {
+  return items
+    .filter((content) => !filters.type || content.type === filters.type)
+    .filter((content) => {
+      if (!filters.search) return true;
+      const query = filters.search.toLowerCase();
+      return [
+        content.title,
+        content.originalTitle ?? "",
+        content.description,
+        content.director ?? "",
+        content.studio ?? "",
+        ...content.genres,
+        ...content.themes,
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(query);
+    })
+    .slice(0, limit);
+}
 
 function toSupabaseContent(row: SupabaseContentRow): EntertainmentContent {
   const genres = parseUnknownArray(row.genres);
@@ -123,8 +143,8 @@ function toSupabaseContent(row: SupabaseContentRow): EntertainmentContent {
   return {
     id: String(row.id),
     externalId: String(row.external_id),
-    provider: row.source?.toUpperCase() === "JIKAN" ? "jikan" : "tmdb",
-    type: normalizeSupabaseType(row.content_type),
+    provider: row.source?.toUpperCase() === "MAL" ? "mal" : row.source?.toUpperCase() === "JIKAN" ? "jikan" : "tmdb",
+    type: normalizeSupabaseType(row.content_type, row.series_type),
     title: row.title,
     originalTitle: row.original_title ?? undefined,
     description: row.overview ?? "",
@@ -136,15 +156,20 @@ function toSupabaseContent(row: SupabaseContentRow): EntertainmentContent {
     country: parseUnknownText(row.country) ?? "Unknown",
     releaseYear: Number(row.release_year ?? 0),
     duration: row.duration_minutes ?? undefined,
-    episodes: row.episodes ?? undefined,
-    season: row.season_number ? `Season ${row.season_number}` : undefined,
+    episodes: row.number_of_episodes ?? undefined,
+    season: row.number_of_seasons
+      ? `${row.number_of_seasons} Seasons`
+      : row.season_number
+        ? `Season ${row.season_number}`
+        : undefined,
     studio: parseUnknownText(row.studio),
     director: parseUnknownText(row.director),
     cast: parseUnknownArray(row.cast),
     rating,
     popularity,
     match: Math.round(Math.min(99, rating * 10 + popularity * 0.08)),
-    reason: `Recommended because it matches your ${normalizeSupabaseType(row.content_type)} and ${genres[0] ?? "story"} preferences.`,
+    reason: `Recommended because it matches your ${normalizeSupabaseType(row.content_type, row.series_type)} and ${genres[0] ?? "story"} preferences.`,
+    trailerUrl: row.trailer_url ?? undefined,
   };
 }
 
@@ -153,7 +178,9 @@ async function listSupabaseContents(
   limit: number,
 ): Promise<EntertainmentContent[]> {
   const config = createSupabaseConfig();
-  if (!config.isConfigured) return [];
+  if (!config.isConfigured) {
+    throw new ContentServiceError("Supabase content storage is not configured", "not_configured");
+  }
 
   const query = new URLSearchParams({
     select: [
@@ -161,6 +188,7 @@ async function listSupabaseContents(
       "external_id",
       "source",
       "content_type",
+      "series_type",
       "title",
       "original_title",
       "overview",
@@ -172,21 +200,24 @@ async function listSupabaseContents(
       "country",
       "release_year",
       "duration_minutes",
-      "episodes",
+      "number_of_episodes",
+      "number_of_seasons",
       "season_number",
       "studio",
       "director",
       "cast",
       "rating_average",
       "popularity_score",
+      "trailer_url",
     ].join(","),
     order: "popularity_score.desc.nullslast",
     limit: String(Math.max(limit, 100)),
   });
 
   if (filters.type) {
-    const remoteType = filters.type === "series" ? "tv_series" : filters.type;
+    const remoteType = filters.type === "kdrama" ? "series" : filters.type;
     query.set("content_type", `eq.${remoteType}`);
+    if (filters.type === "kdrama") query.set("series_type", "eq.kdrama");
   }
 
   const response = await fetch(`${config.url}/rest/v1/contents?${query}`, {
@@ -197,9 +228,18 @@ async function listSupabaseContents(
     cache: "no-store",
   });
 
-  if (!response.ok) return [];
+  if (!response.ok) {
+    throw new ContentServiceError(
+      `Supabase content request returned HTTP ${response.status}`,
+      "request_failed",
+    );
+  }
 
-  const rows = (await response.json()) as SupabaseContentRow[];
+  const payload = await response.json().catch(() => null);
+  if (!Array.isArray(payload)) {
+    throw new ContentServiceError("Supabase content response is invalid", "invalid_response");
+  }
+  const rows = payload as SupabaseContentRow[];
   const items = rows.map(toSupabaseContent);
 
   return items
@@ -226,60 +266,80 @@ export async function listContents(filters: ContentFilters = {}): Promise<Entert
   const limit = Math.min(Math.max(filters.limit ?? 24, 1), 100);
   try {
     const supabaseItems = await listSupabaseContents(filters, limit);
-    if (supabaseItems.length) return supabaseItems;
-  } catch {
-    // Fall back to D1 or the curated catalog when Supabase is unavailable.
+    if (supabaseItems.length || usesProductionDataPath()) return supabaseItems;
+  } catch (error) {
+    if (usesProductionDataPath()) throw error;
   }
 
-  try {
-    const db = getDb();
-    const where = and(
-      filters.type ? eq(contents.type, filters.type) : undefined,
-      filters.search ? like(contents.title, `%${filters.search}%`) : undefined,
-    );
-    const rows = await db
-      .select()
-      .from(contents)
-      .where(where)
-      .orderBy(desc(contents.popularity))
-      .limit(limit);
-    if (rows.length) return rows.map(toContent);
-  } catch {
-    // Local preview and a fresh deployment can use the curated catalog until sync runs.
-  }
-
-  return catalog
-    .filter((content) => !filters.type || content.type === filters.type)
-    .filter((content) => {
-      if (!filters.search) return true;
-      const query = filters.search.toLowerCase();
-      return [
-        content.title,
-        content.originalTitle ?? "",
-        content.description,
-        content.director ?? "",
-        content.studio ?? "",
-        ...content.genres,
-        ...content.themes,
-      ]
-        .join(" ")
-        .toLowerCase()
-        .includes(query);
-    })
-    .slice(0, limit);
+  return filterContents(await developmentCatalog(), filters, limit);
 }
 
 export async function getContentById(id: string): Promise<EntertainmentContent | null> {
+  const production = usesProductionDataPath();
   const numericId = Number(id);
   if (Number.isInteger(numericId)) {
-    try {
-      const db = getDb();
-      const rows = await db.select().from(contents).where(eq(contents.id, numericId)).limit(1);
-      if (rows[0]) return toContent(rows[0]);
-    } catch {
-      // Fall through to curated catalog.
+    const config = createSupabaseConfig();
+    if (!config.isConfigured) {
+      if (production) {
+        throw new ContentServiceError("Supabase content storage is not configured", "not_configured");
+      }
+    } else {
+      const query = new URLSearchParams({
+        select: "id,external_id,source,content_type,series_type,title,original_title,overview,poster_url,backdrop_url,genres,themes,original_language,country,release_year,duration_minutes,number_of_episodes,number_of_seasons,season_number,studio,director,cast,rating_average,popularity_score,trailer_url",
+        id: `eq.${numericId}`,
+        limit: "1",
+      });
+      try {
+        const response = await fetch(`${config.url}/rest/v1/contents?${query}`, {
+          headers: { apikey: config.anonKey, authorization: `Bearer ${config.anonKey}` },
+          cache: "no-store",
+        });
+        if (response.ok) {
+          const rows = (await response.json()) as SupabaseContentRow[];
+          if (rows[0]) return toSupabaseContent(rows[0]);
+        } else {
+          throw new ContentServiceError(
+            `Supabase content request returned HTTP ${response.status}`,
+            "request_failed",
+          );
+        }
+      } catch (error) {
+        if (production) throw error;
+      }
     }
+    if (production) return null;
   }
 
-  return catalog.find((content) => content.id === id) ?? null;
+  if (production) return null;
+  const catalog = await developmentCatalog();
+  const curated = catalog.find((content) => content.id === id) ?? null;
+  if (curated) {
+    const config = createSupabaseConfig();
+    if (config.isConfigured) {
+      const sourceFilter = curated.provider === "mal"
+        ? "eq.MAL"
+        : curated.provider === "jikan"
+          ? "in.(MAL,JIKAN)"
+          : "eq.TMDB";
+      const query = new URLSearchParams({
+        select: "id,external_id,source,content_type,series_type,title,original_title,overview,poster_url,backdrop_url,genres,themes,original_language,country,release_year,duration_minutes,number_of_episodes,number_of_seasons,season_number,studio,director,cast,rating_average,popularity_score,trailer_url",
+        source: sourceFilter,
+        external_id: `eq.${curated.externalId}`,
+        limit: "1",
+      });
+      try {
+        const response = await fetch(`${config.url}/rest/v1/contents?${query}`, {
+          headers: { apikey: config.anonKey, authorization: `Bearer ${config.anonKey}` },
+          cache: "no-store",
+        });
+        if (response.ok) {
+          const rows = (await response.json()) as SupabaseContentRow[];
+          if (rows[0]) return toSupabaseContent(rows[0]);
+        }
+      } catch {
+        // Keep the curated record available when Supabase cannot be reached.
+      }
+    }
+  }
+  return curated;
 }

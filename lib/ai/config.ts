@@ -1,4 +1,9 @@
-import { readRuntimeEnv } from "@/lib/runtime-env";
+import {
+  getEnvironmentValue,
+  readRuntimeEnv,
+  type RuntimeEnvironment,
+  validateProductionServiceUrls,
+} from "@/lib/env";
 
 export type AIEnvironment = {
   REMOTE_AI_BASE_URL?: string;
@@ -18,50 +23,37 @@ export type AIConfig = Readonly<{
   isConfigured: boolean;
 }>;
 
-const DEFAULT_BASE_URL = "https://ai.punipuni.my.id/v1";
-const DEFAULT_MODEL = "ag/gemini-3.7-flash-high";
-const REASONING_MODEL = "cx/gpt-5.6-sol";
-const FALLBACK_MODEL = "cx/gpt-5.6-terra";
-
 function processEnvironment(): AIEnvironment {
   return readRuntimeEnv() as AIEnvironment;
-}
-
-function clean(value: string | undefined, fallback = ""): string {
-  return value?.trim() || fallback;
 }
 
 export function createAIConfig(
   environment: AIEnvironment = processEnvironment(),
 ): AIConfig {
+  const runtimeEnvironment = environment as RuntimeEnvironment;
   const config = {
-    baseUrl: clean(environment.REMOTE_AI_BASE_URL, DEFAULT_BASE_URL).replace(
-      /\/$/,
-      "",
-    ),
-    apiKey: clean(environment.REMOTE_AI_API_KEY),
-    defaultModel: clean(environment.REMOTE_AI_DEFAULT_MODEL, DEFAULT_MODEL),
-    reasoningModel: clean(
-      environment.REMOTE_AI_REASONING_MODEL,
-      REASONING_MODEL,
-    ),
-    fallbackModel: clean(
-      environment.REMOTE_AI_FALLBACK_MODEL,
-      FALLBACK_MODEL,
-    ),
+    baseUrl: getEnvironmentValue("REMOTE_AI_BASE_URL", runtimeEnvironment).replace(/\/$/, ""),
+    apiKey: getEnvironmentValue("REMOTE_AI_API_KEY", runtimeEnvironment),
+    defaultModel: getEnvironmentValue("REMOTE_AI_DEFAULT_MODEL", runtimeEnvironment),
+    reasoningModel: getEnvironmentValue("REMOTE_AI_REASONING_MODEL", runtimeEnvironment),
+    fallbackModel: getEnvironmentValue("REMOTE_AI_FALLBACK_MODEL", runtimeEnvironment),
   };
   const validationErrors: string[] = [];
 
-  try {
-    const url = new URL(config.baseUrl);
-    if (!/^https?:$/.test(url.protocol)) validationErrors.push("invalid_base_url");
-  } catch {
-    validationErrors.push("invalid_base_url");
+  if (!config.baseUrl) validationErrors.push("Missing required environment variable: REMOTE_AI_BASE_URL");
+  if (config.baseUrl) {
+    try {
+      const url = new URL(config.baseUrl);
+      if (!/^https?:$/.test(url.protocol)) validationErrors.push("REMOTE_AI_BASE_URL must be a valid HTTP(S) URL");
+    } catch {
+      validationErrors.push("REMOTE_AI_BASE_URL must be a valid URL");
+    }
   }
-  if (!config.apiKey) validationErrors.push("missing_api_key");
-  if (!config.defaultModel) validationErrors.push("missing_default_model");
-  if (!config.reasoningModel) validationErrors.push("missing_reasoning_model");
-  if (!config.fallbackModel) validationErrors.push("missing_fallback_model");
+  if (!config.apiKey) validationErrors.push("Missing required environment variable: REMOTE_AI_API_KEY");
+  if (!config.defaultModel) validationErrors.push("Missing required environment variable: REMOTE_AI_DEFAULT_MODEL");
+  if (!config.reasoningModel) validationErrors.push("Missing required environment variable: REMOTE_AI_REASONING_MODEL");
+  if (!config.fallbackModel) validationErrors.push("Missing required environment variable: REMOTE_AI_FALLBACK_MODEL");
+  validationErrors.push(...validateProductionServiceUrls(["REMOTE_AI_BASE_URL"], runtimeEnvironment));
 
   return Object.freeze({
     ...config,

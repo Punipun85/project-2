@@ -1,3 +1,4 @@
+import { AIServiceError, requestAIServiceJSON } from "@/lib/ai-client";
 import type { AIConfig } from "./config";
 import { logAIRequest } from "./logger";
 import { selectAIModel, type AITaskType } from "./router";
@@ -13,11 +14,22 @@ export type AICandidate = {
   genres: string[];
   themes: string[];
   reason: string;
+  overview?: string;
+  rating?: number;
+  cast?: string[];
+  characters?: string[];
+  similarity?: number;
 };
 
 type OpenAICompatibleResponse = {
   choices?: Array<{ message?: { content?: string } }>;
 };
+
+function isCompletionResponse(payload: unknown): payload is OpenAICompatibleResponse {
+  if (!payload || typeof payload !== "object") return false;
+  const answer = (payload as OpenAICompatibleResponse).choices?.[0]?.message?.content;
+  return typeof answer === "string" && Boolean(answer.trim());
+}
 
 export type AIClientResult = {
   answer: string | null;
@@ -41,6 +53,7 @@ export class AIRequestError extends Error {
 export function buildRecommendationMessages(
   message: string,
   candidates: AICandidate[],
+  userContext?: string,
 ): AIChatMessage[] {
   const candidateContext = candidates.map((candidate) => ({
     title: candidate.title,
@@ -48,19 +61,31 @@ export function buildRecommendationMessages(
     genres: candidate.genres,
     themes: candidate.themes,
     recommendationReason: candidate.reason,
+    overview: candidate.overview,
+    rating: candidate.rating,
+    cast: candidate.cast,
+    characters: candidate.characters,
+    semanticSimilarity: candidate.similarity,
   }));
 
   return [
     {
       role: "system",
       content:
-        "You are Lumi, NexaPlay AI's concise entertainment curator. Answer in the user's language. Use only the supplied candidates and metadata. Never invent titles, cast, ratings, or availability. Give clear recommendation reasons in at most two short paragraphs.",
+        "You are Lumi, NexaPlay AI's concise entertainment curator. Answer in the user's language. Use only the supplied NexaPlay catalog context and optional user-history summary. Never invent titles, plot details, characters, cast, ratings, or availability. Explain why each recommendation matches and explicitly name the metadata or user preference that supports it. If the catalog context is empty or insufficient, clearly say that the information is unavailable in NexaPlay; do not substitute general knowledge. Keep the answer to at most three short paragraphs.",
     },
     {
       role: "user",
-      content: `User request: ${message}\n\nRanked candidates:\n${JSON.stringify(candidateContext)}`,
+      content: `User request: ${message}\n\nRetrieved catalog context:\n${JSON.stringify(candidateContext)}${userContext ? `\n\nUser history summary:\n${userContext}` : ""}`,
     },
   ];
+}
+
+export function buildGroundedFallbackAnswer(candidates: AICandidate[]): string {
+  if (!candidates.length) {
+    return "I don't have enough verified NexaPlay catalog information to answer that yet. Try another title or add a genre, mood, or content type.";
+  }
+  return `I found ${candidates.map((candidate) => candidate.title).join(", ")}. ${candidates[0].reason}`;
 }
 
 export async function executeWithFallback<T>(
@@ -102,14 +127,15 @@ async function requestCompletion(
   timeoutMs: number,
 ): Promise<string> {
   const startedAt = Date.now();
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
   let errorType: string | null = null;
 
   try {
-    const response = await fetchImplementation(
-      `${config.baseUrl}/chat/completions`,
-      {
+    const payload = await requestAIServiceJSON<OpenAICompatibleResponse>({
+      service: "llm",
+      url: `${config.baseUrl}/chat/completions`,
+      timeoutMs,
+      fetchImplementation,
+      init: {
         method: "POST",
         headers: {
           authorization: `Bearer ${config.apiKey}`,
@@ -121,27 +147,10 @@ async function requestCompletion(
           temperature: taskType === "reasoning" ? 0.35 : 0.55,
           max_tokens: taskType === "reasoning" ? 700 : 300,
         }),
-        signal: controller.signal,
       },
-    );
-    if (response.status >= 500) {
-      throw new AIRequestError("http_server_error", true);
-    }
-    if (!response.ok) {
-      throw new AIRequestError("http_client_error", false);
-    }
-
-    let payload: OpenAICompatibleResponse;
-    try {
-      payload = (await response.json()) as OpenAICompatibleResponse;
-    } catch {
-      throw new AIRequestError("invalid_response", true);
-    }
-    const answer = payload.choices?.[0]?.message?.content;
-    if (typeof answer !== "string") {
-      throw new AIRequestError("invalid_response", true);
-    }
-    if (!answer.trim()) throw new AIRequestError("empty_response", true);
+      validate: isCompletionResponse,
+    });
+    const answer = payload.choices![0].message!.content!;
 
     logAIRequest({
       model,
@@ -152,13 +161,19 @@ async function requestCompletion(
     });
     return answer.trim();
   } catch (error) {
-    if (error instanceof AIRequestError) {
-      errorType = error.errorType;
-    } else if (controller.signal.aborted) {
-      errorType = "timeout";
-    } else {
-      errorType = "network_error";
-    }
+    const failure = error instanceof AIServiceError
+      ? new AIRequestError(
+          error.code === "http_error"
+            ? (error.status !== null && error.status >= 500
+                ? "http_server_error"
+                : "http_client_error")
+            : error.code,
+          error.code !== "http_error" || error.status === null || error.status >= 500,
+        )
+      : error instanceof AIRequestError
+        ? error
+        : new AIRequestError("unknown_error", true);
+    errorType = failure.errorType;
     logAIRequest({
       model,
       taskType,
@@ -166,11 +181,7 @@ async function requestCompletion(
       success: false,
       errorType,
     });
-    throw error instanceof AIRequestError
-      ? error
-      : new AIRequestError(errorType, true);
-  } finally {
-    clearTimeout(timeout);
+    throw failure;
   }
 }
 

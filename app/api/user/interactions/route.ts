@@ -5,7 +5,7 @@ import {
   restFetch,
 } from "@/lib/supabase/server";
 
-const eventTypes = new Set(["view", "click", "watchlist", "complete", "rating", "search", "chat"]);
+const eventTypes = new Set(["view", "click", "watchlist", "complete", "rating", "search", "chat", "not_interested"]);
 
 export async function POST(request: Request) {
   const supabase = createSupabaseConfig();
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
   const metadata = { ...(body?.metadata ?? {}) };
   if (typeof metadata.query === "string") metadata.query = metadata.query.slice(0, 500);
   const rating = eventType === "rating" ? Number(body?.rating) : null;
-  if (eventType === "rating" && (!Number.isFinite(rating) || rating < 1 || rating > 5)) {
+  if (eventType === "rating" && (rating === null || !Number.isFinite(rating) || rating < 1 || rating > 5)) {
     return Response.json({ error: "Rating must be from 1 to 5" }, { status: 400 });
   }
   const response = await restFetch(supabase, session.token, "user_interactions", {
