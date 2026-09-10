@@ -1,0 +1,1 @@
+"""NexaPlay embedding microservice package."""
