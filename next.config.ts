@@ -1,4 +1,23 @@
+import { existsSync } from "node:fs";
 import type { NextConfig } from "next";
+
+const unsupportedLocalEnvironmentFiles = [
+  ".env.local",
+  ".env.development",
+  ".env.development.local",
+  ".env.production",
+  ".env.production.local",
+  ".env.test",
+  ".env.test.local",
+].filter((file) => existsSync(file));
+
+if (unsupportedLocalEnvironmentFiles.length > 0) {
+  throw new Error(
+    `NexaPlay uses .env as its only local environment source. Remove or disable: ${unsupportedLocalEnvironmentFiles.join(
+      ", ",
+    )}`,
+  );
+}
 
 const contentSecurityPolicy = [
   "default-src 'self'",
