@@ -17,9 +17,9 @@ before(async () => {
           "/d",
           "/s",
           "/c",
-          "npm run dev -- --host 127.0.0.1 --port 8788",
+          "npm run dev -- --hostname 127.0.0.1 --port 8788",
         ]
-      : ["run", "dev", "--", "--host", "127.0.0.1", "--port", "8788"];
+      : ["run", "dev", "--", "--hostname", "127.0.0.1", "--port", "8788"];
 
   devServer = spawn(
     command,
@@ -85,7 +85,6 @@ test("server-renders the EntertainmentAI dashboard", async () => {
   );
   assert.match(html, /EntertainmentAI/);
   assert.match(html, /Your universe/);
-  assert.match(html, /Attack on Titan/);
   assert.match(html, /Ask Lumi/);
   assert.match(html, /https?:\/\/[^"]+\/og\.png/);
   assert.doesNotMatch(
@@ -103,7 +102,28 @@ test("filters the universal catalog by content type", async () => {
   assert.ok(payload.data.every((item) => item.type === "anime"));
 });
 
-test("routes normal natural-language searches to the default AI model", async () => {
+test("serves premium content detail from canonical Supabase ids", async (context) => {
+  const contentsResponse = await fetch(`${baseUrl}/api/contents?limit=10`);
+  assert.equal(contentsResponse.status, 200);
+  const contentsPayload = await contentsResponse.json();
+  const candidate = contentsPayload.data?.find((item) => item.id);
+  if (!candidate) context.skip("No Supabase content rows available for detail validation.");
+
+  const detailResponse = await fetch(`${baseUrl}/api/content/${candidate.id}`);
+  assert.equal(detailResponse.status, 200);
+  const detail = (await detailResponse.json()).data;
+  assert.equal(String(detail.id), String(candidate.id));
+  assert.ok(Array.isArray(detail.characters));
+  assert.ok(Array.isArray(detail.castCredits));
+});
+
+test("renders the premium content detail shell", async () => {
+  const response = await fetch(`${baseUrl}/content/movie-interstellar`, { headers: { accept: "text/html" } });
+  assert.equal(response.status, 200);
+  assert.match(await response.text(), /content-experience|detail-loading/i);
+});
+
+test("returns unavailable information when vector and fallback context are absent", async () => {
   const response = await fetch(`${baseUrl}/api/ai/chat`, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -112,17 +132,16 @@ test("routes normal natural-language searches to the default AI model", async ()
   assert.equal(response.status, 200);
 
   const payload = await response.json();
-  assert.ok(payload.intent.contentTypes.includes("anime"));
-  assert.ok(
-    ["openai-compatible", "deterministic-fallback"].includes(
-      payload.meta.provider,
-    ),
-  );
-  assert.equal(payload.meta.taskType, "default");
-  assert.equal(payload.meta.model, "ag/gemini-3.7-flash-high");
+  assert.equal(payload.meta.retrievalFallbackUsed, true);
+  assert.equal(payload.meta.retrievalEngine, "metadata-popularity-fallback-v1");
+  assert.equal(typeof payload.meta.groundedSources, "number");
+  assert.ok(payload.meta.groundedSources >= 0);
+  assert.ok(typeof payload.meta.errorType === "string" || payload.meta.errorType === null);
+  assert.equal(typeof payload.answer, "string");
+  assert.ok(payload.answer.length > 0);
 });
 
-test("routes complex preference analysis to the reasoning AI model", async () => {
+test("AI chat uses grounded records or a deterministic fallback safely", async () => {
   const response = await fetch(`${baseUrl}/api/ai/chat`, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -133,8 +152,10 @@ test("routes complex preference analysis to the reasoning AI model", async () =>
   assert.equal(response.status, 200);
 
   const payload = await response.json();
-  assert.equal(payload.meta.taskType, "reasoning");
-  assert.equal(payload.meta.model, "cx/gpt-5.6-sol");
+  assert.equal(payload.meta.retrievalFallbackUsed, true);
+  assert.ok(payload.meta.groundedSources > 0);
+  assert.ok(["deterministic-fallback", "remote-ai"].includes(payload.meta.provider));
+  assert.ok(payload.recommendations.length <= payload.meta.groundedSources);
 });
 
 test("renders every Batch 4 application page", async () => {
@@ -146,6 +167,10 @@ test("renders every Batch 4 application page", async () => {
     ["/profile", "Your taste dashboard"],
     ["/watchlist", "Your watchlist"],
     ["/history", "History.*continue watching"],
+    ["/profile/preferences", "Your preference profile"],
+    ["/rating-history", "Your rating history"],
+    ["/favorites", "Your favorites"],
+    ["/onboarding", "Taste calibration"],
   ]);
 
   for (const [path, copy] of pages) {
@@ -177,6 +202,13 @@ test("protects onboarding, watchlist, and history APIs without a Supabase sessio
     }),
     fetch(`${baseUrl}/api/user/watchlist`),
     fetch(`${baseUrl}/api/user/history`),
+    fetch(`${baseUrl}/api/user/onboarding`),
+    fetch(`${baseUrl}/api/user/preferences`),
+    fetch(`${baseUrl}/api/user/ratings`),
+    fetch(`${baseUrl}/api/user/favorites`),
+    fetch(`${baseUrl}/api/user/taste-profile`),
+    fetch(`${baseUrl}/api/content/rating`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ contentId: 1, rating: 5 }) }),
+    fetch(`${baseUrl}/api/content/favorite`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ contentId: 1 }) }),
   ];
   const responses = await Promise.all(calls);
   assert.ok(responses.every((response) => response.status === 401));

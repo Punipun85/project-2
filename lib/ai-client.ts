@@ -32,7 +32,7 @@ function logServiceRequest(event: {
   status: number | null;
   errorType: AIServiceErrorCode | null;
 }) {
-  console.info("[ai-service]", JSON.stringify(event));
+  console.info("[external-service]", JSON.stringify(event));
 }
 
 export async function requestAIServiceJSON<T>({
@@ -119,4 +119,3 @@ export async function requestAIServiceJSON<T>({
     clearTimeout(timeout);
   }
 }
-

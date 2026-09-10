@@ -4,7 +4,7 @@
 import { Bookmark, Check, Clock3, Heart, Play, Sparkles, Star, ThumbsDown, UsersRound, X } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { EntertainmentContent } from "@/lib/catalog";
+import type { EntertainmentContent } from "@/lib/content-types";
 import type { ContentExperience } from "@/lib/content-experience";
 import { trailerEmbedUrl } from "@/lib/trailer";
 import { CharacterCard } from "./character-card";

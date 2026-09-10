@@ -10,41 +10,28 @@
     "build": "next build",
     "build:vercel": "npm run build",
     "start": "next start",
-    "dev:cloudflare": "vinext dev",
-    "build:cloudflare": "vinext build",
-    "start:cloudflare": "vinext start",
-    "test": "npm run build && node --import tsx --test tests/ai-routing.test.ts && node --test tests/rendered-html.test.mjs",
+    "test": "npm run build && node --import tsx --test tests/environment.test.ts tests/ai-routing.test.ts tests/ai-core.test.ts tests/recommendation-client.test.ts tests/personalization.test.ts tests/content-experience.test.ts tests/production-admin.test.ts && node --test tests/rendered-html.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
-    "db:generate": "drizzle-kit generate",
     "embeddings:generate": "node --env-file-if-exists=.env --import tsx scripts/generate-embeddings.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",
     "@supabase/supabase-js": "^2.115.0",
-    "drizzle-orm": "0.45.2",
     "lucide-react": "^0.468.0",
     "next": "16.3.4",
     "react": "19.2.6",
     "react-dom": "19.2.6"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "1.37.1",
     "@tailwindcss/postcss": "4.2.1",
     "@types/node": "22.19.19",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
-    "@vitejs/plugin-react": "6.0.2",
-    "@vitejs/plugin-rsc": "0.5.26",
-    "drizzle-kit": "0.31.10",
     "eslint": "9.39.4",
     "eslint-config-next": "16.3.4",
-    "react-server-dom-webpack": "19.2.6",
     "tailwindcss": "4.2.1",
     "tsx": "^4.22.1",
-    "typescript": "5.9.3",
-    "vinext": "0.0.50",
-    "vite": "8.0.13",
-    "wrangler": "4.92.0"
+    "typescript": "5.9.3"
   },
   "type": "module"
 }

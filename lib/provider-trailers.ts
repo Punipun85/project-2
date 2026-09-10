@@ -1,4 +1,4 @@
-import type { EntertainmentContent } from "@/lib/catalog";
+import type { EntertainmentContent } from "@/lib/content-types";
 import { getEnvironmentValue } from "@/lib/env";
 
 const cache = new Map<string, { value: string | null; expires: number }>();

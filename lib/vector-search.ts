@@ -1,4 +1,4 @@
-import type { ContentType, EntertainmentContent } from "@/lib/catalog";
+import type { ContentType, EntertainmentContent } from "@/lib/content-types";
 import {
   createEmbeddingConfig,
   EmbeddingError,

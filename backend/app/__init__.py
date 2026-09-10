@@ -1,1 +1,0 @@
-"""EntertainmentAI FastAPI service."""

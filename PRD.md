@@ -94,6 +94,6 @@ Watchlist, ratings, watch progress, completion status, skips, and assistant memo
 - All five content types are represented in navigation, data, search, and detail views.
 - The hybrid score is `0.6 * content similarity + 0.4 * collaborative score`.
 - Anime, K-drama, and cross-category recommendation tests pass.
-- D1 and PostgreSQL-compatible models express the universal content schema.
+- Supabase PostgreSQL migrations express the canonical universal content schema.
 - TMDB and official MyAnimeList normalization pipelines are present.
 - API contracts and architecture are documented.

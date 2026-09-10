@@ -4,19 +4,17 @@
 
 | Layer | Technology |
 | --- | --- |
-| Web | React 19, TypeScript, vinext, Tailwind CSS runtime, Lucide icons |
-| Edge API | Next-compatible route handlers on Cloudflare Workers |
-| Domain API | FastAPI, Pydantic, SQLAlchemy |
-| Edge persistence | Cloudflare D1 through Drizzle ORM |
-| Primary production database | PostgreSQL |
+| Web | Next.js, React 19, TypeScript, Tailwind CSS runtime, Lucide icons |
+| API | Next.js route handlers |
+| Primary production database | Supabase PostgreSQL |
 | Catalog providers | TMDB and official MyAnimeList API v2 through the unified `data-pipeline` |
 | Recommendation | Python universal hybrid engine |
 | Embeddings | Sentence Transformers; ChromaDB adapter planned |
-| LLM | Ollama-compatible service with deterministic fallback |
+| LLM | Remote OpenAI-compatible AI gateway with deterministic fallback |
 
 ## Universal content model
 
-`contents` replaces the movie-only concept. Provider identity is unique across `(source, external_id)` in Supabase. Arrays are JSONB in PostgreSQL and serialized JSON text in D1.
+`contents` replaces the movie-only concept. Provider identity is unique across `(source, external_id)` in Supabase. Arrays are JSONB in PostgreSQL.
 
 Important type-specific fields remain nullable:
 
@@ -57,13 +55,13 @@ Embedding text varies by content type:
 
 ## Persistence
 
-D1 is configured as the Sites persistence layer and ships with a Drizzle migration. FastAPI models mirror the same domain shape for PostgreSQL deployments. D1 stores structured product data; no browser storage is treated as authoritative.
+Supabase PostgreSQL is the canonical data source. No browser storage or legacy
+local catalog is treated as authoritative in production.
 
 ## Failure behavior
 
-- A fresh D1 database returns the curated catalog until provider sync runs.
 - MAL and TMDB provider failures are isolated so healthy provider imports can continue.
-- Ollama failure returns a deterministic explanation.
+- AI gateway failure returns a deterministic explanation.
 - The unified `data-pipeline` runs provider synchronization outside the user request path.
 - Inputs are length-limited and supported content types are allow-listed.
 

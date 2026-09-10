@@ -2,15 +2,14 @@
 
 ```mermaid
 flowchart LR
-    UI["React / vinext web"] --> EDGE["Edge route handlers"]
-    UI --> API["FastAPI domain API"]
-    EDGE --> D1["Cloudflare D1"]
-    API --> PG["PostgreSQL"]
-    EDGE --> REC["Universal hybrid ranker"]
-    API --> REC
-    EDGE --> AI["Ollama LLM service"]
-    API --> AI
-    REC --> VECTOR["Embedding / vector index"]
+    UI["Next.js web app"] --> API["Next.js API routes"]
+    API --> PG["Supabase PostgreSQL"]
+    API --> REC["Recommendation service"]
+    API --> EMBED["Embedding service"]
+    API --> AI["Remote AI gateway"]
+    REC --> PG
+    REC --> EMBED
+    EMBED --> VECTOR["pgvector content embeddings"]
     PIPELINE["Unified data pipeline"] --> TMDB["TMDB API"]
     PIPELINE --> MAL["MyAnimeList API v2"]
     PIPELINE --> PG
@@ -19,14 +18,13 @@ flowchart LR
 ## Repository boundaries
 
 ```text
-app/                    Web UI and edge API routes
-db/                     Drizzle schema and D1 access
-drizzle/                Generated D1 migrations
-lib/                    Shared TypeScript catalog and ranking contracts
-backend/                FastAPI and PostgreSQL domain service
-ml-service/             Universal hybrid recommendation engine and tests
-ai-service/             Ollama-compatible explanation service
+app/                    Next.js UI and API routes
+lib/                    Shared TypeScript runtime contracts and clients
 data-pipeline/          Batch 1 TMDB/MAL ingestion, normalization, logging, and Supabase upsert pipeline
+nexaplay-embedding-service/  Standalone embedding API
+recommendation-service/      Standalone recommendation API
+worker-service/              Scheduled sync and maintenance jobs
+supabase/                Production Supabase migrations
 ```
 
 ## Request paths
@@ -45,7 +43,7 @@ data-pipeline/          Batch 1 TMDB/MAL ingestion, normalization, logging, and 
 2. Intent detection extracts type, language, country, theme, and entities.
 3. Semantic retrieval produces candidates.
 4. The universal ranker orders candidates.
-5. Ollama explains the result; deterministic explanation remains available when Ollama is offline.
+5. The remote AI gateway explains the result; deterministic explanation remains available when the gateway is offline.
 
 ### Catalog synchronization
 
@@ -56,9 +54,8 @@ data-pipeline/          Batch 1 TMDB/MAL ingestion, normalization, logging, and 
 5. Supabase upsert uses `(source, external_id)` as the idempotency key.
 6. Later batches can enrich normalized content without changing this ingestion contract.
 
-## Deployment profiles
+## Deployment profile
 
-- Sites profile: vinext + Worker routes + D1, optimized for the hosted product preview.
-- Service profile: React frontend + FastAPI + PostgreSQL + separate ML/AI/sync services.
-
-Both profiles share the same content vocabulary and recommendation response shape.
+Vercel hosts the Next.js application. Supabase is the canonical database, while
+embedding, recommendation, and worker services run as separate production
+services.

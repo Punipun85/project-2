@@ -48,12 +48,22 @@ export const SERVER_ONLY_ENVIRONMENT_NAMES = [
   "TMDB_API_KEY",
 ] as const satisfies readonly CanonicalEnvironmentName[];
 
-// Optional server integrations and SUPABASE_SERVICE_ROLE_KEY are intentionally
-// excluded from the Vercel web application's required startup contract.
+export const OPTIONAL_APPLICATION_ENVIRONMENT_NAMES: readonly CanonicalEnvironmentName[] = [
+  "SUPABASE_SERVICE_ROLE_KEY",
+  "RECOMMENDATION_API_URL",
+  "RECOMMENDATION_API_KEY",
+  "WORKER_API_URL",
+  "WORKER_API_KEY",
+  "TMDB_API_KEY",
+  "EMBEDDING_TIMEOUT_SECONDS",
+];
+
+// NODE_ENV is set by the runtime, while worker, service-role, trailer, and
+// recommendation-service credentials unlock specific integrations instead of
+// blocking the web application from booting.
 export const APPLICATION_ENVIRONMENT_NAMES: readonly CanonicalEnvironmentName[] = [
   ...PUBLIC_ENVIRONMENT_NAMES,
   "APP_ENV",
-  "NODE_ENV",
   "SUPABASE_URL",
   "SUPABASE_ANON_KEY",
   "EMBEDDING_API_URL",
@@ -64,8 +74,6 @@ export const APPLICATION_ENVIRONMENT_NAMES: readonly CanonicalEnvironmentName[] 
   "REMOTE_AI_DEFAULT_MODEL",
   "REMOTE_AI_REASONING_MODEL",
   "REMOTE_AI_FALLBACK_MODEL",
-  "RECOMMENDATION_API_URL",
-  "RECOMMENDATION_API_KEY",
 ];
 
 export class EnvironmentValidationError extends Error {
