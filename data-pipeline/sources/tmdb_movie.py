@@ -52,7 +52,7 @@ def get_movie_detail(
         params={
             "api_key": config.require_tmdb(),
             "language": "en-US",
-            "append_to_response": "credits",
+            "append_to_response": "credits,videos",
         },
     )
 

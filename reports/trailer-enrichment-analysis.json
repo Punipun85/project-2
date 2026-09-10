@@ -1,0 +1,37 @@
+{
+  "generated_at": "2026-09-10T16:06:04.416Z",
+  "input_generated_at": "2026-09-10T15:38:13.169Z",
+  "total_results": 278,
+  "confidence_groups": {
+    "high": 141,
+    "medium": 2,
+    "low": 3,
+    "failed": 132
+  },
+  "action_distribution": {
+    "would_update": 141,
+    "unmatched": 132,
+    "skipped": 5
+  },
+  "source_distribution": {
+    "TMDB": 81,
+    "MAL": 196,
+    "other": 1
+  },
+  "content_type_distribution": {
+    "anime": 197,
+    "movie": 38,
+    "series": 32,
+    "documentary": 0,
+    "unknown": 11
+  },
+  "risk_classification": {
+    "safe_apply": 136,
+    "manual_review": 5,
+    "reject_review": 132
+  },
+  "apply_candidates_count": 136,
+  "notes": [
+    "The source report has no content_type field. Anime is inferred from MAL/JIKAN; movie/series from matched TMDB provider namespace; unresolved records remain unknown."
+  ]
+}

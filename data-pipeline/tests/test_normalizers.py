@@ -25,9 +25,13 @@ class NormalizerTests(unittest.TestCase):
                 "vote_count": 2300000,
                 "popularity": 98.4,
                 "credits": {
-                    "crew": [{"name": "Christopher Nolan", "job": "Director"}],
+                    "crew": [
+                        {"name": "Christopher Nolan", "job": "Director"},
+                        {"name": "Jonathan Nolan", "job": "Screenplay"},
+                    ],
                     "cast": [{"name": "Matthew McConaughey", "character": "Cooper"}],
                 },
+                "videos": {"results": [{"site": "YouTube", "type": "Trailer", "official": True, "key": "zSWdZVtXT7E"}]},
             }
         )
 
@@ -38,6 +42,8 @@ class NormalizerTests(unittest.TestCase):
         self.assertEqual(data["duration_minutes"], 169)
         self.assertEqual(data["director"][0]["name"], "Christopher Nolan")
         self.assertEqual(data["cast"][0]["character"], "Cooper")
+        self.assertEqual(data["creator"][0]["name"], "Jonathan Nolan")
+        self.assertEqual(data["trailer_url"], "https://www.youtube.com/watch?v=zSWdZVtXT7E")
 
     def test_tmdb_series_normalization_and_kdrama_detection(self) -> None:
         record = normalize_tmdb_series(
@@ -71,6 +77,7 @@ class NormalizerTests(unittest.TestCase):
                         {"name": "Park In-je", "jobs": [{"job": "Director", "episode_count": 20}]}
                     ],
                 },
+                "videos": {"results": [{"site": "YouTube", "type": "Trailer", "key": "moving-trailer"}]},
             }
         )
 
@@ -80,6 +87,7 @@ class NormalizerTests(unittest.TestCase):
         self.assertEqual(record.platform, "Disney+")
         self.assertEqual(record.number_of_episodes, 20)
         self.assertEqual(record.creator[0]["role"], "Creator")
+        self.assertEqual(record.trailer_url, "https://www.youtube.com/watch?v=moving-trailer")
 
     def test_mal_anime_normalization(self) -> None:
         record = normalize_mal_anime(
@@ -104,6 +112,7 @@ class NormalizerTests(unittest.TestCase):
                 "num_scoring_users": 3900000,
                 "num_list_users": 4000000,
                 "popularity": 1,
+                "trailer": {"youtube_id": "aot-trailer"},
             }
         )
 
@@ -115,6 +124,7 @@ class NormalizerTests(unittest.TestCase):
         self.assertEqual(record.release_year, 2020)
         self.assertEqual(record.rating_average, 8.6)
         self.assertEqual(record.characters, [])
+        self.assertEqual(record.trailer_url, "https://www.youtube.com/watch?v=aot-trailer")
 
     def test_mal_short_duration_is_rounded_to_one_minute(self) -> None:
         record = normalize_mal_anime(

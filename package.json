@@ -10,9 +10,13 @@
     "build": "next build",
     "build:vercel": "npm run build",
     "start": "next start",
-    "test": "npm run build && node --import tsx --test tests/environment.test.ts tests/ai-routing.test.ts tests/ai-core.test.ts tests/recommendation-client.test.ts tests/personalization.test.ts tests/content-experience.test.ts tests/production-admin.test.ts && node --test tests/rendered-html.test.mjs",
+    "test": "npm run build && node --import tsx --test tests/environment.test.ts tests/ai-routing.test.ts tests/ai-core.test.ts tests/recommendation-client.test.ts tests/personalization.test.ts tests/content-experience.test.ts tests/production-admin.test.ts tests/trailer-enrichment.test.ts tests/trailer-analysis.test.ts tests/trailer-apply.test.ts && node --test tests/rendered-html.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
-    "embeddings:generate": "node --env-file-if-exists=.env --import tsx scripts/generate-embeddings.ts"
+    "embeddings:generate": "node --env-file-if-exists=.env --import tsx scripts/generate-embeddings.ts",
+    "trailers:dry-run": "node --env-file-if-exists=.env --import tsx scripts/enrich-trailers.ts --dry-run",
+    "trailers:apply": "node --env-file-if-exists=.env --import tsx scripts/enrich-trailers.ts --apply",
+    "trailers:analyze": "node --env-file-if-exists=.env --import tsx scripts/analyze-trailer-report.ts",
+    "trailers:apply-candidates": "node --env-file-if-exists=.env --import tsx scripts/apply-trailer-candidates.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",

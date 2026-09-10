@@ -54,6 +54,8 @@ next-env.d.ts
 /.start-test*.log
 /outputs/
 /work/
+/reports/trailer-enrichment-report.json
+/reports/trailer-enrichment-report.json.tmp
 
 # python
 __pycache__/

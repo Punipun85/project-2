@@ -41,6 +41,7 @@ class ContentRecord(BaseModel):
     overview: str | None = None
     poster_url: str | None = None
     backdrop_url: str | None = None
+    trailer_url: str | None = None
     genres: list[str] = Field(default_factory=list)
     original_language: str | None = None
     country: list[str] = Field(default_factory=list)
@@ -113,6 +114,7 @@ def normalize_tmdb_movie(movie: dict[str, Any], *, cast_limit: int = 20) -> Cont
         overview=_nullable_text(movie.get("overview")),
         poster_url=_tmdb_image(TMDB_POSTER_BASE, movie.get("poster_path")),
         backdrop_url=_tmdb_image(TMDB_BACKDROP_BASE, movie.get("backdrop_path")),
+        trailer_url=_tmdb_trailer_url(movie.get("videos")),
         genres=genres,
         original_language=_nullable_text(movie.get("original_language")),
         country=countries,
@@ -121,6 +123,7 @@ def normalize_tmdb_movie(movie: dict[str, Any], *, cast_limit: int = 20) -> Cont
         duration_minutes=_positive_int(movie.get("runtime")),
         studio=companies,
         director=_tmdb_directors(credits.get("crew")),
+        creator=_tmdb_writers(credits.get("crew")),
         cast=cast,
         characters=[
             {"name": item["character"], "performer": item["name"]}
@@ -156,6 +159,7 @@ def normalize_tmdb_series(series: dict[str, Any], *, cast_limit: int = 20) -> Co
         overview=_nullable_text(series.get("overview")),
         poster_url=_tmdb_image(TMDB_POSTER_BASE, series.get("poster_path")),
         backdrop_url=_tmdb_image(TMDB_BACKDROP_BASE, series.get("backdrop_path")),
+        trailer_url=_tmdb_trailer_url(series.get("videos")),
         genres=_tmdb_names(series.get("genres")),
         original_language=_nullable_text(series.get("original_language")),
         country=countries,
@@ -205,6 +209,7 @@ def normalize_mal_anime(anime: dict[str, Any]) -> ContentRecord:
         alternative_titles=_mal_alternative_titles(anime),
         overview=_nullable_text(anime.get("synopsis")),
         poster_url=_nullable_text(picture.get("large")) or _nullable_text(picture.get("medium")),
+        trailer_url=_anime_trailer_url(anime),
         genres=_tmdb_names(anime.get("genres")),
         original_language="ja",
         country=["Japan"],
@@ -363,6 +368,19 @@ def _tmdb_directors(items: object) -> list[dict[str, Any]]:
     ]
 
 
+def _tmdb_writers(items: object) -> list[dict[str, Any]]:
+    if not isinstance(items, list):
+        return []
+    allowed = {"Writer", "Screenplay", "Story", "Novel", "Characters"}
+    return [
+        {"name": str(item["name"]).strip(), "role": str(item["job"])}
+        for item in items
+        if isinstance(item, dict)
+        and item.get("job") in allowed
+        and _nullable_text(item.get("name"))
+    ]
+
+
 def _tmdb_series_directors(items: object) -> list[dict[str, Any]]:
     if not isinstance(items, list):
         return []
@@ -394,6 +412,38 @@ def _streaming_platform(network_names: list[str]) -> str | None:
 def _tmdb_image(base: str, path: object) -> str | None:
     normalized = _nullable_text(path)
     return f"{base}{normalized}" if normalized else None
+
+
+def _tmdb_trailer_url(value: object) -> str | None:
+    payload = value if isinstance(value, dict) else {}
+    rows = payload.get("results") if isinstance(payload.get("results"), list) else []
+    candidates = [
+        row for row in rows
+        if isinstance(row, dict)
+        and str(row.get("site") or "").casefold() == "youtube"
+        and _nullable_text(row.get("key"))
+    ]
+    candidates.sort(
+        key=lambda row: (
+            str(row.get("type") or "") == "Trailer",
+            bool(row.get("official")),
+            str(row.get("published_at") or ""),
+        ),
+        reverse=True,
+    )
+    return f"https://www.youtube.com/watch?v={candidates[0]['key']}" if candidates else None
+
+
+def _anime_trailer_url(anime: dict[str, Any]) -> str | None:
+    direct = _nullable_text(anime.get("trailer_url"))
+    if direct:
+        return direct
+    trailer = anime.get("trailer") if isinstance(anime.get("trailer"), dict) else {}
+    direct = _nullable_text(trailer.get("url")) or _nullable_text(trailer.get("embed_url"))
+    if direct:
+        return direct
+    youtube_id = _nullable_text(trailer.get("youtube_id"))
+    return f"https://www.youtube.com/watch?v={youtube_id}" if youtube_id else None
 
 
 def _date(value: object) -> str | None:

@@ -52,7 +52,7 @@ def get_series_detail(
         params={
             "api_key": config.require_tmdb(),
             "language": "en-US",
-            "append_to_response": "aggregate_credits",
+            "append_to_response": "aggregate_credits,videos",
         },
     )
 
