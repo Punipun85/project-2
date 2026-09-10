@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import warnings
 from functools import lru_cache
 from pathlib import Path
 
@@ -66,6 +67,15 @@ class Settings(BaseModel):
     def from_environment(cls) -> "Settings":
         load_dotenv(ENV_FILE)
         legacy_pages = os.getenv("IMPORT_PAGES")
+        service_role_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+        legacy_supabase_key = os.getenv("SUPABASE_KEY")
+        if not service_role_key and legacy_supabase_key:
+            warnings.warn(
+                "SUPABASE_KEY is deprecated; use SUPABASE_SERVICE_ROLE_KEY",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            service_role_key = legacy_supabase_key
         return cls(
             tmdb_api_key=os.getenv("TMDB_API_KEY"),
             mal_client_id=os.getenv("MAL_CLIENT_ID"),
@@ -74,7 +84,7 @@ class Settings(BaseModel):
             mal_refresh_token=os.getenv("MAL_REFRESH_TOKEN"),
             mal_redirect_uri=os.getenv("MAL_REDIRECT_URI"),
             supabase_url=os.getenv("SUPABASE_URL"),
-            supabase_key=os.getenv("SUPABASE_KEY"),
+            supabase_key=service_role_key,
             http_timeout_seconds=os.getenv("HTTP_TIMEOUT_SECONDS", "30"),
             request_retries=os.getenv("REQUEST_RETRIES", "4"),
             tmdb_request_delay=os.getenv("TMDB_REQUEST_DELAY", "0.05"),
@@ -101,7 +111,7 @@ class Settings(BaseModel):
     def require_supabase(self) -> tuple[str, str]:
         if not self.supabase_url or not self.supabase_key:
             raise RuntimeError(
-                f"SUPABASE_URL dan SUPABASE_KEY service-role harus dikonfigurasi di {ENV_FILE}"
+                f"SUPABASE_URL dan SUPABASE_SERVICE_ROLE_KEY harus dikonfigurasi di {ENV_FILE}"
             )
         return self.supabase_url, self.supabase_key
 
