@@ -1,0 +1,19 @@
+{
+  "generated_at": "2026-09-10T16:35:18.344Z",
+  "input_generated_at": "2026-09-10T16:27:35.391Z",
+  "total_results": 126,
+  "confidence_distribution": {
+    "confirmed": 65,
+    "unavailable": 61
+  },
+  "action_distribution": {
+    "would_update": 65,
+    "unmatched": 17,
+    "skipped": 44
+  },
+  "safe_candidates": 65,
+  "invalid_mal_ids": 0,
+  "invalid_trailer_urls": 0,
+  "duplicate_content_ids": 0,
+  "report_consistent": true
+}

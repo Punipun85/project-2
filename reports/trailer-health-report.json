@@ -1,0 +1,119 @@
+{
+  "generated_at": "2026-09-10T16:55:27.170Z",
+  "total_contents": 279,
+  "with_trailer": 137,
+  "without_trailer": 142,
+  "coverage_percentage": 49.1,
+  "by_source": {
+    "TMDB": {
+      "total": 82,
+      "with_trailer": 66,
+      "without_trailer": 16,
+      "coverage_percentage": 80.49
+    },
+    "MAL": {
+      "total": 196,
+      "with_trailer": 70,
+      "without_trailer": 126,
+      "coverage_percentage": 35.71
+    },
+    "JIKAN": {
+      "total": 1,
+      "with_trailer": 1,
+      "without_trailer": 0,
+      "coverage_percentage": 100
+    }
+  },
+  "by_type": {
+    "anime": {
+      "total": 197,
+      "with_trailer": 71,
+      "without_trailer": 126,
+      "coverage_percentage": 36.04
+    },
+    "movie": {
+      "total": 40,
+      "with_trailer": 37,
+      "without_trailer": 3,
+      "coverage_percentage": 92.5
+    },
+    "series": {
+      "total": 42,
+      "with_trailer": 29,
+      "without_trailer": 13,
+      "coverage_percentage": 69.05
+    },
+    "documentary": {
+      "total": 0,
+      "with_trailer": 0,
+      "without_trailer": 0,
+      "coverage_percentage": 0
+    },
+    "unknown": {
+      "total": 0,
+      "with_trailer": 0,
+      "without_trailer": 0,
+      "coverage_percentage": 0
+    }
+  },
+  "by_series_type": {
+    "anime_series": {
+      "total": 168,
+      "with_trailer": 56,
+      "without_trailer": 112,
+      "coverage_percentage": 33.33
+    },
+    "kdrama": {
+      "total": 7,
+      "with_trailer": 6,
+      "without_trailer": 1,
+      "coverage_percentage": 85.71
+    },
+    "streaming_series": {
+      "total": 9,
+      "with_trailer": 8,
+      "without_trailer": 1,
+      "coverage_percentage": 88.89
+    },
+    "tv_series": {
+      "total": 22,
+      "with_trailer": 14,
+      "without_trailer": 8,
+      "coverage_percentage": 63.64
+    },
+    "cdrama": {
+      "total": 1,
+      "with_trailer": 1,
+      "without_trailer": 0,
+      "coverage_percentage": 100
+    },
+    "jdrama": {
+      "total": 3,
+      "with_trailer": 0,
+      "without_trailer": 3,
+      "coverage_percentage": 0
+    },
+    "anime_movie": {
+      "total": 27,
+      "with_trailer": 14,
+      "without_trailer": 13,
+      "coverage_percentage": 51.85
+    },
+    "ova": {
+      "total": 2,
+      "with_trailer": 1,
+      "without_trailer": 1,
+      "coverage_percentage": 50
+    }
+  },
+  "validation": {
+    "invalid_urls": 0,
+    "duplicate_urls": 0
+  },
+  "enrichment": {
+    "tmdb_applied": 136,
+    "jikan_candidates": 65,
+    "jikan_applied": 0,
+    "jikan_apply_status": "not_run"
+  }
+}

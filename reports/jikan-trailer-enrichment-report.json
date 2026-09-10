@@ -1,0 +1,1017 @@
+{
+  "generated_at": "2026-09-10T16:27:35.391Z",
+  "checked": 126,
+  "matched": 65,
+  "unmatched": 17,
+  "skipped": 44,
+  "results": [
+    {
+      "content_id": 498,
+      "title": "Attack on Titan Season 3",
+      "mal_id": "35760",
+      "trailer_url": "https://www.youtube.com/watch?v=EHzBhrncmac",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 431,
+      "title": "A Silent Voice",
+      "mal_id": "28851",
+      "trailer_url": "https://www.youtube.com/watch?v=XBNWo25izJ8",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 419,
+      "title": "Attack on Titan Season 3 Part 2",
+      "mal_id": "38524",
+      "trailer_url": "https://www.youtube.com/watch?v=hKHepjfj5Tw",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 450,
+      "title": "Attack on Titan: Final Season",
+      "mal_id": "40028",
+      "trailer_url": "https://www.youtube.com/watch?v=SlNpRThS9t8",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 482,
+      "title": "Violet Evergarden",
+      "mal_id": "33352",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 432,
+      "title": "Code Geass: Lelouch of the Rebellion R2",
+      "mal_id": "2904",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "unmatched"
+    },
+    {
+      "content_id": 484,
+      "title": "Demon Slayer: Kimetsu no Yaiba Entertainment District Arc",
+      "mal_id": "47778",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 453,
+      "title": "Mob Psycho 100 II",
+      "mal_id": "37510",
+      "trailer_url": "https://www.youtube.com/watch?v=Pr43Sayk37s",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 454,
+      "title": "Attack on Titan: Final Season Part 2",
+      "mal_id": "48583",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 478,
+      "title": "Jujutsu Kaisen Season 2",
+      "mal_id": "51009",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 456,
+      "title": "Haikyu!! 3rd Season",
+      "mal_id": "32935",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 428,
+      "title": "Clannad: After Story",
+      "mal_id": "4181",
+      "trailer_url": "https://www.youtube.com/watch?v=WiTwXIAcm5Q",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 430,
+      "title": "Gintama",
+      "mal_id": "918",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "unmatched"
+    },
+    {
+      "content_id": 427,
+      "title": "Kaguya-sama: Love is War -Ultra Romantic-",
+      "mal_id": "43608",
+      "trailer_url": "https://www.youtube.com/watch?v=b4tGGzQve3M",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 483,
+      "title": "Great Teacher Onizuka",
+      "mal_id": "245",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "unmatched"
+    },
+    {
+      "content_id": 439,
+      "title": "Attack on Titan: Final Season - The Final Chapters",
+      "mal_id": "51535",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 444,
+      "title": "Vinland Saga Season 2",
+      "mal_id": "49387",
+      "trailer_url": "https://www.youtube.com/watch?v=jBetoIlnDIM",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 468,
+      "title": "Mob Psycho 100 III",
+      "mal_id": "50172",
+      "trailer_url": "https://www.youtube.com/watch?v=b1miJsAVYJA",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 425,
+      "title": "Bleach: Thousand-Year Blood War",
+      "mal_id": "41467",
+      "trailer_url": "https://www.youtube.com/watch?v=e8YBesRKq_U",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 458,
+      "title": "Monogatari Series: Second Season",
+      "mal_id": "17074",
+      "trailer_url": "https://www.youtube.com/watch?v=YrAdRp69BBY",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 451,
+      "title": "Fighting Spirit",
+      "mal_id": "263",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "unmatched"
+    },
+    {
+      "content_id": 418,
+      "title": "Gintama Season 4",
+      "mal_id": "28977",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "unmatched"
+    },
+    {
+      "content_id": 461,
+      "title": "86 Eighty-Six Part 2",
+      "mal_id": "48569",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 422,
+      "title": "Gintama Season 2",
+      "mal_id": "9969",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "unmatched"
+    },
+    {
+      "content_id": 441,
+      "title": "Frieren: Beyond Journey's End Season 2",
+      "mal_id": "59978",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 429,
+      "title": "Fruits Basket: The Final Season",
+      "mal_id": "42938",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 434,
+      "title": "The Apothecary Diaries Season 2",
+      "mal_id": "58514",
+      "trailer_url": "https://www.youtube.com/watch?v=3BYutu3Pf_0",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 452,
+      "title": "Kizumonogatari Part 3: Cold-Blooded",
+      "mal_id": "31758",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 433,
+      "title": "March Comes In Like a Lion 2nd Season",
+      "mal_id": "35180",
+      "trailer_url": "https://www.youtube.com/watch?v=OfSaJb5OOPA",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 438,
+      "title": "Owarimonogatari Second Season",
+      "mal_id": "35247",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 474,
+      "title": "Bleach: Thousand-Year Blood War - The Separation",
+      "mal_id": "53998",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 496,
+      "title": "Demon Slayer: Kimetsu no Yaiba Infinity Castle I",
+      "mal_id": "59192",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 473,
+      "title": "Kaguya-sama: Love is War -The First Kiss That Never Ends-",
+      "mal_id": "52198",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 510,
+      "title": "Case Closed",
+      "mal_id": "235",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "unmatched"
+    },
+    {
+      "content_id": 423,
+      "title": "Gintama: Enchousen",
+      "mal_id": "15417",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 426,
+      "title": "Gintama Season 5",
+      "mal_id": "34096",
+      "trailer_url": "https://www.youtube.com/watch?v=LOdAAEJiebM",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 470,
+      "title": "My Hero Academia Final Season",
+      "mal_id": "60098",
+      "trailer_url": "https://www.youtube.com/watch?v=wQgQij8Ry4g",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 488,
+      "title": "Fighting Spirit: New Challenger",
+      "mal_id": "5258",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 479,
+      "title": "Mushi-shi: Next Passage Part 1",
+      "mal_id": "21939",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 487,
+      "title": "The Dangers in My Heart Season 2",
+      "mal_id": "55690",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 412,
+      "title": "Re:ZERO -Starting Life in Another World- Season 4",
+      "mal_id": "61316",
+      "trailer_url": "https://www.youtube.com/watch?v=jVl4bY81iIs",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 486,
+      "title": "Bleach: Thousand-Year Blood War - The Conflict",
+      "mal_id": "56784",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 466,
+      "title": "Orb: On the Movements of the Earth",
+      "mal_id": "52215",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 511,
+      "title": "Mushoku Tensei: Jobless Reincarnation Season 3",
+      "mal_id": "59193",
+      "trailer_url": "https://www.youtube.com/watch?v=ODxfIvSgWuo",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 469,
+      "title": "Mushi-shi: Next Passage Part 2",
+      "mal_id": "24701",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 485,
+      "title": "[Oshi No Ko] Season 3",
+      "mal_id": "60058",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 480,
+      "title": "Samurai X: Trust and Betrayal",
+      "mal_id": "44",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 506,
+      "title": "Natsume's Book of Friends Season 4",
+      "mal_id": "11665",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 436,
+      "title": "Gintama: The Movie: The Final Chapter: Be Forever Yorozuya",
+      "mal_id": "15335",
+      "trailer_url": "https://www.youtube.com/watch?v=UhJM5rVqaF8",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 512,
+      "title": "Saga of Tanya the Evil II",
+      "mal_id": "49233",
+      "trailer_url": "https://www.youtube.com/watch?v=kUvhvkPDvm0",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 513,
+      "title": "That Time I Got Reincarnated as a Slime Season 4",
+      "mal_id": "59970",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 449,
+      "title": "Gintama. Silver Soul Arc",
+      "mal_id": "36838",
+      "trailer_url": "https://www.youtube.com/watch?v=vcb-D3FlaCg",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 414,
+      "title": "Steel Ball Run: JoJo's Bizarre Adventure",
+      "mal_id": "61469",
+      "trailer_url": "https://www.youtube.com/watch?v=TWw06YDOQy0",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 437,
+      "title": "Gintama. Silver Soul Arc - Second Half War",
+      "mal_id": "37491",
+      "trailer_url": "https://www.youtube.com/watch?v=E2rzD37MCSg",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 481,
+      "title": "Descending Stories: Showa Genroku Rakugo Shinju",
+      "mal_id": "33095",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 440,
+      "title": "Kingdom Season 3",
+      "mal_id": "40682",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 501,
+      "title": "Monogatari Series: Off & Monster Season",
+      "mal_id": "57864",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 517,
+      "title": "You and I Are Polar Opposites Season 2",
+      "mal_id": "63832",
+      "trailer_url": "https://www.youtube.com/watch?v=pbeDDMlT0rI",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 518,
+      "title": "Trapped in a Dating Sim: The World of Otome Games is Tough for Mobs 2",
+      "mal_id": "54000",
+      "trailer_url": "https://www.youtube.com/watch?v=d3n8-15GCG8",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 519,
+      "title": "Grand Blue Dreaming Season 3",
+      "mal_id": "62542",
+      "trailer_url": "https://www.youtube.com/watch?v=KJw6ZZaMOWA",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 462,
+      "title": "Sound! Euphonium 3",
+      "mal_id": "39894",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 500,
+      "title": "The Master of Diabolism 3",
+      "mal_id": "40434",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 520,
+      "title": "Shin Chan",
+      "mal_id": "966",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "unmatched"
+    },
+    {
+      "content_id": 463,
+      "title": "Kingdom Season 4",
+      "mal_id": "50160",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 522,
+      "title": "Welcome to Demon School! Iruma-kun Season 4",
+      "mal_id": "60310",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 523,
+      "title": "Ascendance of a Bookworm: Adopted Daughter of an Archduke",
+      "mal_id": "57466",
+      "trailer_url": "https://www.youtube.com/watch?v=rtPF6rjrdSU",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 525,
+      "title": "Skeleton Knight in Another World II",
+      "mal_id": "60522",
+      "trailer_url": "https://www.youtube.com/watch?v=Enu3fyOdkoM",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 528,
+      "title": "Clevatess Season 2",
+      "mal_id": "62513",
+      "trailer_url": "https://www.youtube.com/watch?v=0N1-8XY_3Rs",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 532,
+      "title": "The 100 Girlfriends Who Really, Really, Really, Really, Really Love You Season 3",
+      "mal_id": "62811",
+      "trailer_url": "https://www.youtube.com/watch?v=kvbOPdDfPio",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 492,
+      "title": "Umamusume: Cinderella Gray Part 2",
+      "mal_id": "61930",
+      "trailer_url": "https://www.youtube.com/watch?v=9xGGAYRtDAA",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 533,
+      "title": "From Old Country Bumpkin to Master Swordsman Season 2",
+      "mal_id": "61897",
+      "trailer_url": "https://www.youtube.com/watch?v=7n7FDNqtBHg",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 447,
+      "title": "Tomorrow's Joe 2",
+      "mal_id": "2921",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "unmatched"
+    },
+    {
+      "content_id": 503,
+      "title": "Heaven Official's Blessing Season 2",
+      "mal_id": "50399",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 467,
+      "title": "Kingdom Season 5",
+      "mal_id": "53223",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 535,
+      "title": "Kaiju Girl Caramelise",
+      "mal_id": "63150",
+      "trailer_url": "https://www.youtube.com/watch?v=ECtHlHde3EQ",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 536,
+      "title": "From Overshadowed to Overpowered: Second Reincarnation of a Talentless Sage",
+      "mal_id": "63508",
+      "trailer_url": "https://www.youtube.com/watch?v=QOeItd-RrVs",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 537,
+      "title": "Oh Boy, Was I Wrong About Her",
+      "mal_id": "56735",
+      "trailer_url": "https://www.youtube.com/watch?v=Gq5ps9WFkhM",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 539,
+      "title": "The Elusive Samurai Season 2",
+      "mal_id": "60059",
+      "trailer_url": "https://www.youtube.com/watch?v=5xV6uMwR-Xo",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 542,
+      "title": "Hell Mode: The Hardcore Gamer Dominates in Another World with Garbage Balancing Season 2",
+      "mal_id": "63817",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 544,
+      "title": "The Frontier Lord Begins with Zero Subjects",
+      "mal_id": "62078",
+      "trailer_url": "https://www.youtube.com/watch?v=5JpTU6wj_-g",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 545,
+      "title": "Pokémon Horizons: The Series",
+      "mal_id": "53876",
+      "trailer_url": "https://www.youtube.com/watch?v=fs6IVwrmMZo",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 493,
+      "title": "Kingdom Season 6",
+      "mal_id": "61517",
+      "trailer_url": "https://www.youtube.com/watch?v=U3TdjxwaFik",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 547,
+      "title": "The Cat and the Dragon",
+      "mal_id": "61048",
+      "trailer_url": "https://www.youtube.com/watch?v=xi4rGcyeYr8",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 549,
+      "title": "A Livid Lady's Guide to Getting Even: How I Crushed My Homeland with My Mighty Grimoires",
+      "mal_id": "62289",
+      "trailer_url": "https://www.youtube.com/watch?v=sYra4SM3Qms",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 550,
+      "title": "Link Click Season 3",
+      "mal_id": "61607",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 556,
+      "title": "The Insipid Prince's Furtive Grab for The Throne",
+      "mal_id": "56736",
+      "trailer_url": "https://www.youtube.com/watch?v=tcaxQBQMTEk",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 599,
+      "title": "Sekiro: No Defeat",
+      "mal_id": "62312",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 558,
+      "title": "My Hero Academia: I Am a Hero Too",
+      "mal_id": "64107",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "unmatched"
+    },
+    {
+      "content_id": 562,
+      "title": "Doraemon (2005)",
+      "mal_id": "8687",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "unmatched"
+    },
+    {
+      "content_id": 563,
+      "title": "Dara-san of Reiwa",
+      "mal_id": "63082",
+      "trailer_url": "https://www.youtube.com/watch?v=AZKlUSu5tQ0",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 490,
+      "title": "False Memory (2026)",
+      "mal_id": "60568",
+      "trailer_url": "https://www.youtube.com/watch?v=1DmqVoWATgY",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 564,
+      "title": "The Duke's Son Claims He Won't Love Me Yet Showers Me with Adoration",
+      "mal_id": "63537",
+      "trailer_url": "https://www.youtube.com/watch?v=MNzf8UswtzI",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 475,
+      "title": "Lord of Mysteries Specials",
+      "mal_id": "62276",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 566,
+      "title": "The Forsaken Saintess and her Foodie Roadtrip in Another World",
+      "mal_id": "63752",
+      "trailer_url": "https://www.youtube.com/watch?v=VS0bW7JnEm0",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 567,
+      "title": "Shiboyugi: Playing Death Games to Put Food on the Table - L-O---E",
+      "mal_id": "63819",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 602,
+      "title": "Kaiju No. 8: Narumi's Week at Work",
+      "mal_id": "63138",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 568,
+      "title": "Red River",
+      "mal_id": "63489",
+      "trailer_url": "https://www.youtube.com/watch?v=qpFcQ1Bek08",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 569,
+      "title": "Draw This, Then Die!",
+      "mal_id": "61280",
+      "trailer_url": "https://www.youtube.com/watch?v=jI61NtGuxV4",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 570,
+      "title": "My Stepmother and Stepsisters Aren't Wicked",
+      "mal_id": "62102",
+      "trailer_url": "https://www.youtube.com/watch?v=2UBOHZNG1fM",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 571,
+      "title": "Please Excuse My Younger Brothers",
+      "mal_id": "63061",
+      "trailer_url": "https://www.youtube.com/watch?v=d1as4Y7etI0",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 572,
+      "title": "Iron Wok Jan!",
+      "mal_id": "63100",
+      "trailer_url": "https://www.youtube.com/watch?v=awvmDnz3URo",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 573,
+      "title": "Magical Girl Lyrical Nanoha EXCEEDS Gun Blaze Vengeance",
+      "mal_id": "60637",
+      "trailer_url": "https://www.youtube.com/watch?v=4IcEbMCW-FU",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 448,
+      "title": "Gintama Movie 3: Yoshiwara Daienjou",
+      "mal_id": "62277",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 574,
+      "title": "Hana-Kimi Season 2",
+      "mal_id": "63780",
+      "trailer_url": "https://www.youtube.com/watch?v=dN7LV-oVFBg",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 575,
+      "title": "Magilumiere Magical Girls Inc. Season 2",
+      "mal_id": "60552",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 576,
+      "title": "Bungo Stray Dogs Wan! 2",
+      "mal_id": "62883",
+      "trailer_url": "https://www.youtube.com/watch?v=HI0ejq_aNas",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 577,
+      "title": "Recommendations from Iwamoto-Senpai",
+      "mal_id": "63324",
+      "trailer_url": "https://www.youtube.com/watch?v=5Q2OFIvOME0",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 578,
+      "title": "BanG Dream! YUME∞MITA",
+      "mal_id": "62430",
+      "trailer_url": "https://www.youtube.com/watch?v=sMcHl3g6aS4",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 579,
+      "title": "Mrs. Sazae",
+      "mal_id": "2406",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "unmatched"
+    },
+    {
+      "content_id": 603,
+      "title": "To You in the Beyond",
+      "mal_id": "63423",
+      "trailer_url": "https://www.youtube.com/watch?v=fdFjlaZvix8",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 581,
+      "title": "Let's Go Kaikigumi",
+      "mal_id": "62683",
+      "trailer_url": "https://www.youtube.com/watch?v=3DKfmW2aDhY",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 582,
+      "title": "Sword Art Online: Unanswered//butterfly",
+      "mal_id": "63736",
+      "trailer_url": "https://www.youtube.com/watch?v=Zj4FqCJiW80",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 583,
+      "title": "Little Miss Maruko",
+      "mal_id": "6149",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "unmatched"
+    },
+    {
+      "content_id": 584,
+      "title": "Ninjaboy Rantaro",
+      "mal_id": "1199",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "unmatched"
+    },
+    {
+      "content_id": 587,
+      "title": "Azur Lane: Slow Ahead! Season 2",
+      "mal_id": "56613",
+      "trailer_url": "https://www.youtube.com/watch?v=rPZZCDVGqF4",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 589,
+      "title": "Saved by the Ice Cold Prince's Embrace",
+      "mal_id": "63878",
+      "trailer_url": "https://www.youtube.com/watch?v=Q3zyZrf3uyY",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 601,
+      "title": "Kimi to Hanabi to Yakusoku to",
+      "mal_id": "63366",
+      "trailer_url": "https://www.youtube.com/watch?v=a37yywFt78M",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 604,
+      "title": "Sound! Euphonium: The Final Movie Part 2",
+      "mal_id": "64019",
+      "trailer_url": "https://www.youtube.com/watch?v=ynf-VjW-U4A",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 590,
+      "title": "Crowned in a Hundred Days",
+      "mal_id": "62957",
+      "trailer_url": "https://www.youtube.com/watch?v=IYcGvpXYfGE",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 591,
+      "title": "Sore Ike! Anpanman",
+      "mal_id": "1960",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "unmatched"
+    },
+    {
+      "content_id": 592,
+      "title": "Koutetsujou no Kabaneri: Mumei Ranman",
+      "mal_id": "64672",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 593,
+      "title": "Bono Bono",
+      "mal_id": "32353",
+      "trailer_url": "https://www.youtube.com/watch?v=seYMK1m4wsY",
+      "confidence": 1,
+      "action": "would_update"
+    },
+    {
+      "content_id": 594,
+      "title": "Ninjala (TV)",
+      "mal_id": "50418",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "unmatched"
+    },
+    {
+      "content_id": 596,
+      "title": "Rilakkuma",
+      "mal_id": "60153",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "error"
+    },
+    {
+      "content_id": 801,
+      "title": "Shikaru Neko",
+      "mal_id": "48442",
+      "trailer_url": null,
+      "confidence": 0,
+      "action": "unmatched"
+    },
+    {
+      "content_id": 597,
+      "title": "Chiikawa Movie: The Secret of the Mermaid Island",
+      "mal_id": "63011",
+      "trailer_url": "https://www.youtube.com/watch?v=N5439yrq_l8",
+      "confidence": 1,
+      "action": "would_update"
+    }
+  ]
+}
